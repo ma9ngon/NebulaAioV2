@@ -1,4 +1,4 @@
-﻿using EnsoulSharp;
+using EnsoulSharp;
 using EnsoulSharp.SDK;
 using EnsoulSharp.SDK.MenuUI;
 using SharpDX;
@@ -11,51 +11,52 @@ using System.Security.Policy;
 namespace NebulaAio.Champions
 {
 
-    public class Viego
+    public class Khazix
     {
         private static Spell Q, W, E, R;
         private static Menu Config;
+        protected static bool BoolEvolvedQ, BoolEvolvedE;
 
         public static void OnGameLoad()
         {
-            if (ObjectManager.Player.CharacterName != "Viego")
+            if (ObjectManager.Player.CharacterName != "Khazix")
             {
                 return;
             }
 
-            Q = new Spell(SpellSlot.Q, 600f);
-            W = new Spell(SpellSlot.W, 300f);
-            E = new Spell(SpellSlot.E, 400f);
-            R = new Spell(SpellSlot.R, 500f);
+            Q = new Spell(SpellSlot.Q, 325f);
+            W = new Spell(SpellSlot.W, 1025f);
+            E = new Spell(SpellSlot.E, 700f);
+            R = new Spell(SpellSlot.R, 325f);
 
-            Q.SetSkillshot(0.3f, 125, float.MaxValue, false, SpellType.Line, HitChance.None);
-            W.SetSkillshot(0f, 120f, float.MaxValue, true, SpellType.Line, HitChance.None);
-            E.SetSkillshot(0f, 0f, float.MaxValue, false, SpellType.Line);
-            R.SetSkillshot(0.5f, 300f, float.MaxValue, false, SpellType.Circle, HitChance.None);
-            
-            W.SetCharged("ViegoW", "ViegoW", 300, 900, 1f);
-            
+            Q.SetTargetted(0.25f, float.MaxValue);
+            W.SetSkillshot(0.25f, 140, 1700f, true, SpellType.Line, HitChance.None);
+            E.SetSkillshot(0f, 300f, float.MaxValue, false, SpellType.Circle);
 
-            Config = new Menu("Viego", "[Nebula]: Viego", true);
+
+            Config = new Menu("Khazix", "[Nebula]: Khazix", true);
 
             var menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
+            menuC.Add(new MenuSlider("rcount", "Min enemys To use R", 2, 1, 5));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcQ", "Use Q in Lanclear"));
+            menuL.Add(new MenuBool("LcW", "Use W in Lanclear"));
             menuL.Add(new MenuBool("JcQ", "Use Q in Jungleclear"));
-            menuL.Add(new MenuBool("JcE", "Use E in Jungleclear"));
+            menuL.Add(new MenuBool("JcW", "Use W in Jungleclear"));
             
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
+            menuK.Add(new MenuBool("KsW", "Use W to Killsteal"));
+            menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
 
             var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("qchance", "Q HitChance:", new[] { "Low", "Medium", "High", }, 2));
             menuH.Add(new MenuList("wchance", "W HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("rchance", "R HitChance:", new[] { "Low", "Medium", "High", }, 2));
+            menuH.Add(new MenuList("echance", "E HitChance:", new[] { "Low", "Medium", "High", }, 0));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -80,23 +81,13 @@ namespace NebulaAio.Champions
         public static void OnGameUpdate(EventArgs args)
         {
 
-            if (W.IsCharging)
-            {
-                Orbwalker.AttackEnabled = false;
-            }
-            else
-            {
-                Orbwalker.AttackEnabled = true;
-            }
-
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
                 LogicW();
-                LogicQ();
                 LogicE();
                 LogicR();
-
+                LogicQ();
             }
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
@@ -114,7 +105,23 @@ namespace NebulaAio.Champions
             {
 
             }
+            EvoSpells();
             Killsteal();
+        }
+
+        private static void EvoSpells()
+        {
+            if (!BoolEvolvedQ && ObjectManager.Player.HasBuff("KhazixQEvo"))
+            {
+                Q.Range = 375f;
+                BoolEvolvedQ = true;
+            }
+
+            if (!BoolEvolvedE && ObjectManager.Player.HasBuff("KhazixEEvo"))
+            {
+                E.Range = 900f;
+                BoolEvolvedE = true;
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -129,7 +136,6 @@ namespace NebulaAio.Champions
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.White);
             }
 
-
             if (Config["dsettings"].GetValue<MenuBool>("drawE").Enabled)
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.White);
@@ -143,35 +149,21 @@ namespace NebulaAio.Champions
 
         private static void LogicR()
         {
-            var target = TargetSelector.GetTarget(R.Range);
-            var input = R.GetPrediction(target);
-            var rFarmSet = Config["skillpred"].GetValue<MenuList>("rchance").SelectedValue;
-            var useR = Config["Csettings"].GetValue<MenuBool>("UseR").Enabled;
-            string final = rFarmSet;
-            var skill = HitChance.High;
-
-            if (final == "0")
+            var target = TargetSelector.GetTarget(1000);
+            var useR = Config["Csettings"].GetValue<MenuBool>("UseR");
+            var combor = Config["Csettings"].GetValue<MenuSlider>("rcount").Value;
+            
+            if (R.IsReady() && useR.Enabled && ObjectManager.Player.HealthPercent < 35 && target.IsValidTarget(R.Range))
             {
-                skill = HitChance.Low;
+                R.Cast();
             }
-
-            if (final == "1")
+            
+            if (R.IsReady() && useR.Enabled && ObjectManager.Player.CountEnemyHeroesInRange(E.Range) >= combor)
             {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (input.Hitchance >= skill && !target.IsInvulnerable && R.IsInRange(target) && useR && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
-            {
-                R.Cast(input.UnitPosition);
+                R.Cast();
             }
         }
-        
-        public static float lastchangingQ = 0;
+
         private static void LogicW()
         {
             var target = TargetSelector.GetTarget(W.Range);
@@ -181,7 +173,7 @@ namespace NebulaAio.Champions
             string final = wFarmSet;
             var skill = HitChance.High;
             if (target == null) return;
-            
+
             if (final == "0")
             {
                 skill = HitChance.Low;
@@ -197,96 +189,98 @@ namespace NebulaAio.Champions
                 skill = HitChance.High;
             }
 
-            if (!useW.Enabled) return;
-
-            if (W.IsReady() && input.Hitchance >= skill)
+            if (W.IsReady() && useW.Enabled && input.Hitchance >= skill && target.IsValidTarget(W.Range))
             {
-                W.StartCharging();
-
-                {
-                    Orbwalker.AttackEnabled = false;
-
-                    if ((!useW.Enabled || Variables.GameTimeTickCount - lastchangingQ > 1000))
-                    {
-                        if (W.IsChargedSpell)
-                        {
-                            W.Cast(input.UnitPosition);
-                        }
-                    }
-                }
+                W.Cast(input.UnitPosition);
             }
         }
 
         private static void LogicE()
         {
             var target = TargetSelector.GetTarget(E.Range);
-            var useE = Config["Csettings"].GetValue<MenuBool>("UseE").Enabled;
+            var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
+            var input = E.GetPrediction(target);
+            var eFarmSet = Config["skillpred"].GetValue<MenuList>("echance").SelectedValue;
             
-            if (E.IsReady() && useE)
-            {
-                E.Cast(target);
-            }
-        }
-
-
-        private static void LogicQ()
-        {
-            var target = TargetSelector.GetTarget(Q.Range);
-            var input = Q.GetPrediction(target);
-            var qFarmSet = Config["skillpred"].GetValue<MenuList>("qchance").SelectedValue;
-            string final = qFarmSet;
+            string final = eFarmSet;
             var skill = HitChance.High;
-            var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
-
-            if (final == "0")
-            {
+            
+            if (final == "0") {
                 skill = HitChance.Low;
             }
 
-            if (final == "1")
-            {
+            if (final == "1") {
                 skill = HitChance.Medium;
             }
 
-            if (final == "2")
-            {
+            if (final == "2") {
                 skill = HitChance.High;
             }
 
-            if (input.Hitchance >= skill && useQ && Q.IsInRange(target))
+            if (E.IsReady() && useE.Enabled && !Q.IsInRange(target) && input.Hitchance >= skill && target.IsValidTarget(E.Range))
             {
-                Q.Cast(input.UnitPosition);
+                E.Cast(input.UnitPosition);
+            }
+        }
+        
+
+        private static void LogicQ()
+        {
+            var target = TargetSelector.GetTarget(1000);
+            var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ");
+
+            if (Q.IsReady() && useQ.Enabled && target.IsValidTarget(Q.Range))
+            {
+                Q.Cast(target);
             }
         }
 
         private static void Jungle()
         {
-            var JcEe = Config["Clear"].GetValue<MenuBool>("JcE");
+            var JcWe = Config["Clear"].GetValue<MenuBool>("JcW");
             var JcQq = Config["Clear"].GetValue<MenuBool>("JcQ");
             var mobs = GameObjects.Jungle.Where(x => x.IsValidTarget(E.Range)).OrderBy(x => x.MaxHealth)
                 .ToList<AIBaseClient>();
             if (mobs.Count > 0)
             {
                 var mob = mobs[0];
-                if (JcEe.Enabled && E.IsReady() && ObjectManager.Player.Distance(mob.Position) < E.Range) E.Cast(mob);
-                if (JcQq.Enabled && Q.IsReady() &&  ObjectManager.Player.Distance(mob.Position) < Q.Range) Q.Cast(mob.Position);
+                if (JcWe.Enabled && W.IsReady() && ObjectManager.Player.Distance(mob.Position) < W.Range) W.Cast(mob);
+                if (JcQq.Enabled && Q.IsReady() &&  ObjectManager.Player.Distance(mob.Position) < Q.Range) Q.Cast(mob);
             }
         }
 
 
         private static void Laneclear()
         {
-            var allMinions = GameObjects.Minions.Where(x => x.IsValidTarget(E.Range * 2 + E.Width) && !x.IsMoving).Cast<AIBaseClient>().ToList();
-            var rangedMinions = GameObjects.Minions.Where(x => x.IsValidTarget(E.Range * 2 + E.Width) && x.IsRanged && !x.IsMoving).Cast<AIBaseClient>().ToList();
-            var eLocation = E.GetCircularFarmLocation(allMinions, E.Range);
-            var e2Location = E.GetCircularFarmLocation(rangedMinions, E.Range);
-            var bestLocation = (eLocation.MinionsHit > e2Location.MinionsHit + 1) ? eLocation : e2Location;
-
-            if (Q.IsReady() && Config["Clear"].GetValue<MenuBool>("LcQ").Enabled)
+            var lcq = Config["Clear"].GetValue<MenuBool>("LcQ");
+            if (lcq.Enabled && Q.IsReady())
             {
-                if (bestLocation.MinionsHit < 3 && bestLocation.MinionsHit > 0)
+                var minions = GameObjects.EnemyMinions.Where(x => x.IsValidTarget(Q.Range) && x.IsMinion())
+                    .Cast<AIBaseClient>().ToList();
+                if (minions.Any())
                 {
-                    Q.Cast(bestLocation.Position);
+                    var qFarmLocation = Q.GetLineFarmLocation(minions);
+                    if (qFarmLocation.Position.IsValid())
+                    {
+                        Q.Cast(qFarmLocation.Position);
+                        return;
+                    }
+                }
+            }
+
+            var lcw = Config["Clear"].GetValue<MenuBool>("LcW");
+            if (lcw.Enabled && W.IsReady())
+            {
+                var minions = GameObjects.EnemyMinions.Where(x => x.IsValidTarget(Q.Range) && x.IsMinion())
+                    .Cast<AIBaseClient>().ToList();
+                if (minions.Any())
+                {
+                    var wFarmLocation = W.GetLineFarmLocation(minions);
+                    if (wFarmLocation.Position.IsValid())
+                    {
+                        W.Cast(wFarmLocation.Position);
+                        return;
+                    }
                 }
             }
         }
@@ -294,14 +288,30 @@ namespace NebulaAio.Champions
         private static void Killsteal()
         {
             var ksQ = Config["Killsteal"].GetValue<MenuBool>("KsQ").Enabled;
+            var ksW = Config["Killsteal"].GetValue<MenuBool>("KsW").Enabled;
+            var ksE = Config["Killsteal"].GetValue<MenuBool>("KsE").Enabled;
             var target = TargetSelector.GetTarget(Q.Range);
+            var targets = TargetSelector.GetTarget(W.Range);
+            var targetss = TargetSelector.GetTarget(E.Range);
 
             if (target == null) return;
             if (target.IsInvulnerable) return;
+            if (targets == null) return;
+            if (targets.IsInvulnerable) return;
+            if (targetss == null) return;
+            if (targetss.IsInvulnerable) return;
 
             if (!(ObjectManager.Player.Distance(target.Position) <= Q.Range) ||
                 !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.Q) >= target.Health + 20)) return;
             if (Q.IsReady() && ksQ) Q.Cast(target);
+            
+            if (!(ObjectManager.Player.Distance(target.Position) <= W.Range) ||
+                !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.W) >= target.Health + 20)) return;
+            if (W.IsReady() && ksW) W.Cast(target);
+            
+            if (!(ObjectManager.Player.Distance(target.Position) <= E.Range) ||
+                !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.E) >= target.Health + 20)) return;
+            if (E.IsReady() && ksE) E.Cast(target);
             
         }
     }

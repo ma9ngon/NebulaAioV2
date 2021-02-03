@@ -35,6 +35,18 @@ namespace NebulaAio
                         Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + ObjectManager.Player.CharacterName + " Loaded");
                         Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + "<font color='#F7FF00' size='25'>Devloped By Akane </font>");
                         break;
+                    
+                    case "Khazix":
+                        Khazix.OnGameLoad();
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + ObjectManager.Player.CharacterName + " Loaded");
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + "<font color='#F7FF00' size='25'>Devloped By Akane </font>");
+                        break;
+                    
+                    case "Lux":
+                        Lux.OnGameLoad();
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + ObjectManager.Player.CharacterName + " Loaded");
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + "<font color='#F7FF00' size='25'>Devloped By Akane </font>");
+                        break;
 
                     default:
                         Game.Print("<font color='#ff0000' size='25'>[NebulaAIO] Does Not Support :" + ObjectManager.Player.CharacterName + "</font>");
@@ -42,7 +54,7 @@ namespace NebulaAio
                         break;
                 }
                 string stringg;
-                string uri = "https://raw.githubusercontent.com/Senthixx/Nebula-Reborn/main/version.txt";
+                string uri = "https://raw.githubusercontent.com/Senthixx/NebulaAioV2/main/version.txt";
                 using (WebClient client = new WebClient())
                 {
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;

@@ -67,9 +67,9 @@ namespace NebulaAio.Champions
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
+                LogicE();
                 LogicQ();
                 LogicW();
-                LogicE();
 
             }
 

@@ -63,7 +63,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Khazix.cs" />
     <Compile Include="Champions\Kindred.cs" />
+    <Compile Include="Champions\Lux.cs" />
     <Compile Include="Champions\Viego.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
