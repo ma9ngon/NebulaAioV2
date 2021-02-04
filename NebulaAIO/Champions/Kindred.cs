@@ -24,7 +24,7 @@ namespace NebulaAio.Champions
 
             Q = new Spell(SpellSlot.Q, 340f);
             W = new Spell(SpellSlot.W, 500f);
-            E = new Spell(SpellSlot.E, 400f);
+            E = new Spell(SpellSlot.E, ObjectManager.Player.GetCurrentAutoAttackRange());
             R = new Spell(SpellSlot.R, 500f);
 
             E.SetTargetted(0.25f, float.MaxValue);
@@ -87,7 +87,6 @@ namespace NebulaAio.Champions
             {
 
             }
-
             LogicR();
         }
 
@@ -136,8 +135,7 @@ namespace NebulaAio.Champions
                 W.Cast(target);
             }
         }
-
-
+        
         private static void LogicE()
         {
             var target = TargetSelector.GetTarget(E.Range);
