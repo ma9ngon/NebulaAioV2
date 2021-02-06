@@ -152,6 +152,7 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(1000);
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR");
             var combor = Config["Csettings"].GetValue<MenuSlider>("rcount").Value;
+            if (target == null) return;
             
             if (R.IsReady() && useR.Enabled && ObjectManager.Player.HealthPercent < 35 && target.IsValidTarget(R.Range))
             {
@@ -201,6 +202,7 @@ namespace NebulaAio.Champions
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
             var input = E.GetPrediction(target);
             var eFarmSet = Config["skillpred"].GetValue<MenuList>("echance").SelectedValue;
+            if (target == null) return;
             
             string final = eFarmSet;
             var skill = HitChance.High;
@@ -228,6 +230,7 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(1000);
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ");
+            if (target == null) return;
 
             if (Q.IsReady() && useQ.Enabled && target.IsValidTarget(Q.Range))
             {

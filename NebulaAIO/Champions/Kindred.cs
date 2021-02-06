@@ -118,6 +118,7 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(Q.Range);
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
+            if (target == null) return;
 
             if (Q.IsReady() && useQ && target.IsValidTarget(Q.Range))
             {
@@ -129,6 +130,7 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(W.Range);
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW").Enabled;
+            if (target == null) return;
 
             if (W.IsReady() && useW && target.IsValidTarget(W.Range))
             {
@@ -140,6 +142,7 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(E.Range);
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE").Enabled;
+            if (target == null) return;
 
             if (E.IsReady() && useE && target.IsValidTarget(E.Range))
             {

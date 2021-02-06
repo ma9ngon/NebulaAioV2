@@ -38,19 +38,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EnsoulSharp">
-      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
+      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\Reference\EnsoulSharp.dll</HintPath>
     </Reference>
     <Reference Include="EnsoulSharp.SDK">
-      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
+      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="EnsoulSharp.SDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bcecb37b3b5656dd">
+      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\Reference\EnsoulSharp.SDK.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\EnsoulSharp\Reference\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\Reference\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\Reference\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>C:\Users\Senth\Documents\Moglen\League\EnsoulSharp\Reference\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,6 +66,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Cassiopeia.cs" />
+    <Compile Include="Champions\Diana.cs" />
     <Compile Include="Champions\Khazix.cs" />
     <Compile Include="Champions\Kindred.cs" />
     <Compile Include="Champions\Lux.cs" />

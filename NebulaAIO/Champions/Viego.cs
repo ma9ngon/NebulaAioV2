@@ -149,6 +149,7 @@ namespace NebulaAio.Champions
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR").Enabled;
             string final = rFarmSet;
             var skill = HitChance.High;
+            if (target == null) return;
 
             if (final == "0")
             {
@@ -181,7 +182,7 @@ namespace NebulaAio.Champions
             string final = wFarmSet;
             var skill = HitChance.High;
             if (target == null) return;
-            
+
             if (final == "0")
             {
                 skill = HitChance.Low;
@@ -221,6 +222,7 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(E.Range);
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE").Enabled;
+            if (target == null) return;
             
             if (E.IsReady() && useE)
             {
@@ -237,6 +239,7 @@ namespace NebulaAio.Champions
             string final = qFarmSet;
             var skill = HitChance.High;
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
+            if (target == null) return;
 
             if (final == "0")
             {
