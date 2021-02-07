@@ -66,12 +66,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Ashe.cs" />
     <Compile Include="Champions\Cassiopeia.cs" />
     <Compile Include="Champions\Diana.cs" />
     <Compile Include="Champions\Khazix.cs" />
     <Compile Include="Champions\Kindred.cs" />
     <Compile Include="Champions\Lux.cs" />
     <Compile Include="Champions\Viego.cs" />
+    <Compile Include="Champions\Xerath.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

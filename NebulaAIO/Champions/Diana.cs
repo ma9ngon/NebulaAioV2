@@ -158,7 +158,7 @@ namespace NebulaAio.Champions
             }
 
             if (R.IsReady() && useR.Enabled &&
-                R.GetDamage(target) + Q.GetDamage(target) + E.GetDamage(target) + W.GetDamage(target) >= target.Health && target.IsValidTarget(R.Range))
+                R.GetDamage(target) + Q.GetDamage(target) + E.GetDamage(target) + W.GetDamage(target) >= target.Health && target.IsValidTarget(R.Range) && !target.IsInvulnerable)
             {
                 R.Cast();
             }

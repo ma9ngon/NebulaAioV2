@@ -159,7 +159,7 @@ namespace NebulaAio.Champions
 
             if (input.Hitchance >= HitChance.High && inputt.Hitchance >= HitChance.High && bc.Enabled &&
                 target.IsValidTarget(E.Range) &&
-                Q.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && Q.IsReady() && E.IsReady() && R.IsReady())
+                Q.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && Q.IsReady() && E.IsReady() && R.IsReady() && !target.IsInvulnerable)
             {
                 E.Cast(inputt.UnitPosition);
                 Q.Cast(input.UnitPosition);
