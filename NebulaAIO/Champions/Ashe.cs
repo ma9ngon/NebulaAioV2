@@ -30,7 +30,7 @@ namespace NebulaAio.Champions
             
             W.SetSkillshot(0.25f, 0f, 2000f, true, SpellType.Cone);
             E.SetSkillshot(0.25f, 300f, 1400f, false, SpellType.Line);
-            R.SetSkillshot(0.25f, 130f, 1600f, false, SpellType.Line, HitChance.None);
+            R.SetSkillshot(0.25f, 130f, 1600f, false, SpellType.Line);
 
 
             Config = new Menu("Ashe", "[Nebula]: Ashe", true);

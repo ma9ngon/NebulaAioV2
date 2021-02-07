@@ -28,10 +28,10 @@ namespace NebulaAio.Champions
             E = new Spell(SpellSlot.E, 400f);
             R = new Spell(SpellSlot.R, 500f);
 
-            Q.SetSkillshot(0.3f, 125, float.MaxValue, false, SpellType.Line, HitChance.None);
-            W.SetSkillshot(0f, 120f, float.MaxValue, true, SpellType.Line, HitChance.None);
+            Q.SetSkillshot(0.3f, 125, float.MaxValue, false, SpellType.Line);
+            W.SetSkillshot(0f, 120f, float.MaxValue, true, SpellType.Line);
             E.SetSkillshot(0f, 0f, float.MaxValue, false, SpellType.Line);
-            R.SetSkillshot(0.5f, 300f, float.MaxValue, false, SpellType.Circle, HitChance.None);
+            R.SetSkillshot(0.5f, 300f, float.MaxValue, false, SpellType.Circle);
             
             W.SetCharged("ViegoW", "ViegoW", 300, 900, 1f);
             

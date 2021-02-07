@@ -28,10 +28,10 @@ namespace NebulaAio.Champions
             E = new Spell(SpellSlot.E, 1100f);
             R = new Spell(SpellSlot.R, 3400f);
 
-            Q.SetSkillshot(0.25f, 140f, 2400f, false, SpellType.Line, HitChance.None);
-            W.SetSkillshot(0.25f, 160f, 1700f, true, SpellType.Line, HitChance.None);
-            E.SetSkillshot(0.25f, 310f, 1200f, false, SpellType.Circle, HitChance.None);
-            R.SetSkillshot(1.00f, 200f, float.MaxValue, false, SpellType.Line, HitChance.None);                     
+            Q.SetSkillshot(0.25f, 140f, 2400f, false, SpellType.Line);
+            W.SetSkillshot(0.25f, 160f, 1700f, true, SpellType.Line);
+            E.SetSkillshot(0.25f, 310f, 1200f, false, SpellType.Circle);
+            R.SetSkillshot(1.00f, 200f, float.MaxValue, false, SpellType.Line);                     
 
             Config = new Menu("Lux", "[Nebula]: Lux", true);
 
@@ -155,15 +155,16 @@ namespace NebulaAio.Champions
             var bc = Config["Misc"].GetValue<MenuBool>("bc");
             var input = Q.GetPrediction(target);
             var inputt = E.GetPrediction(target);
+            var inputtt = R.GetPrediction(target);
             if (target == null) return;
 
-            if (input.Hitchance >= HitChance.High && inputt.Hitchance >= HitChance.High && bc.Enabled &&
+            if (input.Hitchance >= HitChance.High && inputt.Hitchance >= HitChance.High && inputtt.Hitchance >= HitChance.High && bc.Enabled &&
                 target.IsValidTarget(E.Range) &&
                 Q.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && Q.IsReady() && E.IsReady() && R.IsReady() && !target.IsInvulnerable)
             {
                 E.Cast(inputt.UnitPosition);
                 Q.Cast(input.UnitPosition);
-                R.Cast(target);
+                R.Cast(inputtt.UnitPosition);
             }
 
         }

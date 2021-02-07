@@ -28,7 +28,7 @@ namespace NebulaAio.Champions
             E = new Spell(SpellSlot.E, 825f);
             R = new Spell(SpellSlot.R, 475f);
 
-            Q.SetSkillshot(0.25f, 0f, float.MaxValue, false, SpellType.Line, HitChance.None);
+            Q.SetSkillshot(0.25f, 0f, float.MaxValue, false, SpellType.Line);
             E.SetTargetted(0f, float.MaxValue);
 
 

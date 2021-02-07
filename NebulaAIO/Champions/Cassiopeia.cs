@@ -28,8 +28,8 @@ namespace NebulaAio.Champions
             E = new Spell(SpellSlot.E, 700f);
             R = new Spell(SpellSlot.R, 825);
 
-            Q.SetSkillshot(0.25f, 75f, float.MaxValue, false, SpellType.Circle, HitChance.None);
-            W.SetSkillshot(0.25f, 160, float.MaxValue, false, SpellType.Circle, HitChance.High);
+            Q.SetSkillshot(0.25f, 75f, float.MaxValue, false, SpellType.Circle);
+            W.SetSkillshot(0.25f, 160, float.MaxValue, false, SpellType.Circle);
             R.SetSkillshot(0.5f, (float)(80 * Math.PI / 180), float.MaxValue, false, SpellType.Cone);
             
             E.SetTargetted(0.25f, float.MaxValue);

@@ -29,10 +29,10 @@ namespace NebulaAio.Champions
             E = new Spell(SpellSlot.E, 1050f);
             R = new Spell(SpellSlot.R, 5000f);
 
-            Q.SetSkillshot(0.6f, 65f, 20000f, false, SpellType.Line, HitChance.None);
-            W.SetSkillshot(0.75f, 125f, float.MaxValue, false, SpellType.Circle, HitChance.None);
-            E.SetSkillshot(0.25f, 60f, 1400f, true, SpellType.Line, HitChance.None);
-            R.SetSkillshot(0.627f, 68f, 20000, false, SpellType.Circle, HitChance.None);
+            Q.SetSkillshot(0.6f, 65f, 20000f, false, SpellType.Line);
+            W.SetSkillshot(0.75f, 125f, float.MaxValue, false, SpellType.Circle);
+            E.SetSkillshot(0.25f, 60f, 1400f, true, SpellType.Line);
+            R.SetSkillshot(0.627f, 68f, 20000, false, SpellType.Circle);
 
             Q.SetCharged("XerathArcanopulseChargeUp", "XerathArcanopulseChargeUp", 750, 1550, 1.5f);
 
