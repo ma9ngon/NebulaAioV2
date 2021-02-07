@@ -37,7 +37,7 @@ namespace NebulaAio.Champions
 
             var menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
-            menuC.Add(new MenuBool("UseW", "Use W in Combo"));
+            menuC.Add(new MenuBool("UseW", "Use W to shield low allies"));
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
 
@@ -50,13 +50,16 @@ namespace NebulaAio.Champions
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
             menuK.Add(new MenuBool("KsR", "Use R to Killsteal"));
+            
+            var menuM = new Menu("Misc", "Misc");
+            menuM.Add(new MenuBool("rdrake", "Drake/Baron steal"));
+            menuM.Add(new MenuBool("Agc", "Q Antigapcloser"));
+            menuM.Add(new MenuBool("bc", "Auto Burst Combo"));
 
             var menuH = new Menu("skillpred", "SkillShot HitChance ");
             menuH.Add(new MenuList("qchance", "Q HitChance:", new[] { "Low", "Medium", "High", }, 2));
             menuH.Add(new MenuList("echance", "E HitChance:", new[] { "Low", "Medium", "High", }, 2));
             
-            var menuM = new Menu("Misc", "Misc");
-            menuM.Add(new MenuBool("rdrake", "Drake/Baron steal"));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -77,6 +80,7 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
+            AntiGapcloser.OnGapcloser += OnGapcloser;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -105,8 +109,21 @@ namespace NebulaAio.Champions
             {
 
             }
-            Killsteal();
+            BurstCombo();
             steal();
+            Killsteal();
+            LogicW();
+        }
+
+        private static void OnGapcloser(AIBaseClient sender, AntiGapcloser.GapcloserArgs args)
+        {
+            if (Config["Misc"].GetValue<MenuBool>("Agc").Enabled && Q.IsReady() && sender.IsEnemy)
+            {
+                if (sender.IsValidTarget(Q.Range))
+                {
+                    Q.Cast(sender);
+                }
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -132,6 +149,25 @@ namespace NebulaAio.Champions
             }
         }
 
+        private static void BurstCombo()
+        {
+            var target = TargetSelector.GetTarget(1000);
+            var bc = Config["Misc"].GetValue<MenuBool>("bc");
+            var input = Q.GetPrediction(target);
+            var inputt = E.GetPrediction(target);
+            if (target == null) return;
+
+            if (input.Hitchance >= HitChance.High && inputt.Hitchance >= HitChance.High && bc.Enabled &&
+                target.IsValidTarget(E.Range) &&
+                Q.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && Q.IsReady() && E.IsReady() && R.IsReady())
+            {
+                E.Cast(inputt.UnitPosition);
+                Q.Cast(input.UnitPosition);
+                R.Cast(target);
+            }
+
+        }
+
         private static void LogicR()
         {
             var target = TargetSelector.GetTarget(1000);
@@ -149,16 +185,12 @@ namespace NebulaAio.Champions
         private static void LogicW()
         {
             var target = TargetSelector.GetTarget(W.Range);
-            var ally = GameObjects.AllyHeroes.Where(x => x.IsValidTarget(W.Range, false) && !x.IsMe)
+            var ally = GameObjects.AllyHeroes.Where(x => x.IsValidTarget(W.Range, false) && x.HealthPercent < 35 && !x.IsMe)
                 .OrderBy(x => x.Health).ToList();
 
-            if (ally.Count > 1)
+            if (ally.Count > 0)
             {
-                W.Cast(ally[0]);
-            }
-            else
-            {
-                W.Cast(target);
+                W.Cast(ally[0].Position);
             }
         }
 
@@ -255,6 +287,8 @@ namespace NebulaAio.Champions
                 var mob = ObjectManager.Get<AIMinionClient>()
                     .Where(x => x.IsValidTarget(R.Range) && x.AttackRange >= 500f && x.IsJungle())
                     .OrderBy(x => x.Health).FirstOrDefault();
+                if (mob == null)
+                    return;
 
                 if (mob.Health <= R.GetDamage(mob) + 25f && !mob.IsDead)
                 {
