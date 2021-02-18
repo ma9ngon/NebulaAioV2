@@ -11,10 +11,11 @@ using System.Security.Policy;
 namespace NebulaAio.Champions
 {
 
-    public class Annie
+    public static class Annie
     {
         private static Spell Q, W, E, R;
         private static Menu Config;
+        private static bool gotAggro;
 
         public static void OnGameLoad()
         {
@@ -47,6 +48,10 @@ namespace NebulaAio.Champions
             menuL.Add(new MenuBool("JcQ", "Use Q in Jungleclear"));
             menuL.Add(new MenuBool("JcW", "Use W in Jungleclear"));
 
+            var menuM = new Menu("Misc", "Misc");
+            menuM.Add(new MenuBool("aes", "Auto Cast E To Get Last Passive Stack"));
+            menuM.Add(new MenuBool("asf", "Auto Stack Passive In fountain"));
+
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
             menuK.Add(new MenuBool("KsW", "Use W to Killsteal"));
@@ -62,6 +67,7 @@ namespace NebulaAio.Champions
 
             Config.Add(menuC);
             Config.Add(menuL);
+            Config.Add(menuM);
             Config.Add(menuK);
             Config.Add(menuD);
 
@@ -69,6 +75,7 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
+            AIHeroClient.OnAggro += OnAggro;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -98,6 +105,8 @@ namespace NebulaAio.Champions
             {
 
             }
+            basestack();
+            EStack();
             Shield();
             Killsteal();
         }
@@ -123,6 +132,18 @@ namespace NebulaAio.Champions
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Red);
             }
+        }
+
+        private static void OnAggro(AIBaseClient sender, AIBaseClientAggroEventArgs args)
+        {
+            if (!ObjectManager.Player.IsDead && sender.IsEnemy && !sender.IsMinion() &&
+                args.NetworkId == ObjectManager.Player.NetworkId) gotAggro = true;
+        }
+
+        private static bool InAARangeOf(this AIHeroClient player, AIHeroClient target)
+        {
+            if (player.Distance(target.Position) < target.AttackRange) return true;
+            return false;
         }
 
         private static void LogicR()
@@ -159,9 +180,20 @@ namespace NebulaAio.Champions
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
             if (target == null) return;
 
-            if (E.IsReady() && useE.Enabled && target.IsValidTarget(Q.Range) && ObjectManager.Player.HealthPercent < 35)
+            if (E.IsReady() && useE.Enabled)
             {
-                E.Cast();
+                var close = GameObjects.EnemyHeroes.Where(x =>
+                    ObjectManager.Player.InAARangeOf(x) && (x.IsFacing(ObjectManager.Player) ||
+                                                            x.GetWaypoints().LastOrDefault().DistanceToPlayer() <
+                                                            100f));
+                if (gotAggro && !close.Any())
+                {
+                    gotAggro = false;
+                }
+                else if (gotAggro && close.Any())
+                {
+                    E.Cast();
+                }
             }
 
             if (E.IsReady() && useE.Enabled && target.IsValidTarget(Q.Range) &&
@@ -189,9 +221,29 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(E.Range);
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
 
-            foreach (var allies in GameObjects.AllyHeroes.Where(y => y.HealthPercent < 35 && useE.Enabled && y.DistanceToPlayer() < E.Range))
+            foreach (var allies in GameObjects.AllyHeroes.Where(y => y.HealthPercent < 35 && useE.Enabled && y.DistanceToPlayer() < E.Range && !ObjectManager.Player.IsMe))
             {
                 E.Cast(allies);
+            }
+        }
+
+        private static void EStack()
+        {
+            var aes = Config["Misc"].GetValue<MenuBool>("aes");
+            if (aes.Enabled && ObjectManager.Player.GetBuffCount("anniepassivestack") == 3 && E.IsReady())
+            {
+                E.Cast();
+            }
+        }
+
+        private static void basestack()
+        {
+            var basestack = Config["Misc"].GetValue<MenuBool>("asf");
+            if (basestack.Enabled && ObjectManager.Player.InFountain() &&
+                ObjectManager.Player.GetBuffCount("anniepassivestack") < 4 && !ObjectManager.Player.HasBuff("anniepassiveprimed"))
+            {
+                W.Cast(Game.CursorPos);
+                E.Cast();
             }
         }
 
