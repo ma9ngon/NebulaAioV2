@@ -44,6 +44,10 @@ namespace NebulaAio.Champions
             var menuE = new Menu("Esettings", "E Settings");
             menuE.Add(new MenuBool("Ekill", "Use E Only When target is Killable", true));
             menuE.Add(new MenuBool("Estacks", "Use E When Target have Max Stacks", false));
+            menuE.Add(new MenuBool("Edrake", "Use E To Drake/Baron Steal", true));
+
+            var menuM = new Menu("Misc", "Misc");
+            menuM.Add(new MenuBool("Agc", "W Antigapcloser"));
 
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
@@ -64,6 +68,7 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
+            AntiGapcloser.OnGapcloser += OnGapcloser;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -91,7 +96,7 @@ namespace NebulaAio.Champions
             {
 
             }
-
+            steal();
             Killsteal();
         }
 
@@ -110,6 +115,34 @@ namespace NebulaAio.Champions
             if (Config["dsettings"].GetValue<MenuBool>("drawR").Enabled)
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Red);
+            }
+        }
+        
+        private static void steal()
+        {
+            if (Config["Esettings"].GetValue<MenuBool>("Edrake").Enabled && E.IsReady() )
+            {
+                var mob = ObjectManager.Get<AIMinionClient>()
+                    .Where(x => x.IsValidTarget(E.Range) && x.AttackRange >= 500f && x.IsJungle())
+                    .OrderBy(x => x.Health).FirstOrDefault();
+                if (mob == null)
+                    return;
+
+                if (mob.Health <= GetRealEDamage(mob) + 25f && !mob.IsDead)
+                {
+                    E.Cast();
+                }
+            }
+        }
+        
+        private static void OnGapcloser(AIBaseClient sender, AntiGapcloser.GapcloserArgs args)
+        {
+            if (Config["Misc"].GetValue<MenuBool>("Agc").Enabled && W.IsReady() && sender.IsEnemy)
+            {
+                if (sender.IsValidTarget(W.Range))
+                {
+                    W.Cast(sender);
+                }
             }
         }
 
