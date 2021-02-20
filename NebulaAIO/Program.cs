@@ -108,6 +108,12 @@ namespace NebulaAio
                         Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + "<font color='#F7FF00' size='25'>Devloped By Akane </font>");
                         break;
                     
+                    case "Swain":
+                        Swain.OnGameLoad();
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + ObjectManager.Player.CharacterName + " Loaded");
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + "<font color='#F7FF00' size='25'>Devloped By Akane </font>");
+                        break;
+                    
                     default:
                         Game.Print("<font color='#ff0000' size='25'>[NebulaAIO] Does Not Support :" + ObjectManager.Player.CharacterName + "</font>");
                         Console.WriteLine("[NebulaAIO] Does Not Support " + ObjectManager.Player.CharacterName);
@@ -121,7 +127,7 @@ namespace NebulaAio
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     stringg = client.DownloadString(uri);
                 }
-                string versionas = "2.0.0.10\n";
+                string versionas = "2.0.0.11\n";
                 if (versionas != stringg)
                 {
                     Game.Print("<font color='#ff0000'> [NebulaAIO]: </font> <font color='#ffe6ff' size='25'>You don't have the current version, please UPDATE !</font>");

@@ -77,6 +77,7 @@
     <Compile Include="Champions\Kindred.cs" />
     <Compile Include="Champions\Lux.cs" />
     <Compile Include="Champions\Malphite.cs" />
+    <Compile Include="Champions\Swain.cs" />
     <Compile Include="Champions\Twitch.cs" />
     <Compile Include="Champions\Viego.cs" />
     <Compile Include="Champions\Xerath.cs" />
