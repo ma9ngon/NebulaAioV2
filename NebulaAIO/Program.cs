@@ -114,6 +114,12 @@ namespace NebulaAio
                         Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + "<font color='#F7FF00' size='25'>Devloped By Akane </font>");
                         break;
                     
+                    case "Gragas":
+                        Gragas.OnGameLoad();
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + ObjectManager.Player.CharacterName + " Loaded");
+                        Game.Print("<font color='#ff0000' size='25'> [NebulaAIO]:  </font>" + "<font color='#F7FF00' size='25'>Devloped By Akane </font>");
+                        break;
+                    
                     default:
                         Game.Print("<font color='#ff0000' size='25'>[NebulaAIO] Does Not Support :" + ObjectManager.Player.CharacterName + "</font>");
                         Console.WriteLine("[NebulaAIO] Does Not Support " + ObjectManager.Player.CharacterName);
