@@ -51,9 +51,6 @@ namespace NebulaAio.Champions
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
             menuK.Add(new MenuBool("KsR", "Use R to Killsteal", false));
 
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("rchance", "R HitChance:", new[] { "Low", "Medium", "High", }, 2));
-
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -65,7 +62,6 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuL);
             Config.Add(menuK);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
@@ -146,30 +142,13 @@ namespace NebulaAio.Champions
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR");
             var combor = Config["Csettings"].GetValue<MenuSlider>("rcount").Value;
             var input = R.GetPrediction(target);
-            var rFarmSet = Config["skillpred"].GetValue<MenuList>("rchance").SelectedValue;
-            if (target == null) return;
-            
-            string final = rFarmSet;
-            var skill = HitChance.High;
-            
-            if (final == "0") {
-                skill = HitChance.Low;
-            }
 
-            if (final == "1") {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2") {
-                skill = HitChance.High;
-            }
-            
-            if (R.IsReady() && useR.Enabled && input.Hitchance >= skill && Q.GetDamage(target) + W.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && target.IsValidTarget(R.Range))
+            if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && Q.GetDamage(target) + W.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && target.IsValidTarget(R.Range))
             {
                 R.Cast(input.UnitPosition);
             }
 
-            if (R.IsReady() && useR.Enabled && input.Hitchance >= skill && GetHitByR(target) >= combor &&
+            if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && GetHitByR(target) >= combor &&
                 target.IsValidTarget(R.Range))
             {
                 R.Cast(input.UnitPosition);

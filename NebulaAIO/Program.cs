@@ -127,7 +127,7 @@ namespace NebulaAio
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     stringg = client.DownloadString(uri);
                 }
-                string versionas = "2.0.0.11\n";
+                string versionas = "2.0.0.12\n";
                 if (versionas != stringg)
                 {
                     Game.Print("<font color='#ff0000'> [NebulaAIO]: </font> <font color='#ffe6ff' size='25'>You don't have the current version, please UPDATE !</font>");

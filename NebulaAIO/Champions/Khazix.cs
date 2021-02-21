@@ -54,10 +54,6 @@ namespace NebulaAio.Champions
             menuK.Add(new MenuBool("KsW", "Use W to Killsteal"));
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
 
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("wchance", "W HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("echance", "E HitChance:", new[] { "Low", "Medium", "High", }, 0));
-
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -69,7 +65,6 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuL);
             Config.Add(menuK);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
@@ -170,27 +165,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(W.Range);
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW");
             var input = W.GetPrediction(target);
-            var wFarmSet = Config["skillpred"].GetValue<MenuList>("wchance").SelectedValue;
-            string final = wFarmSet;
-            var skill = HitChance.High;
             if (target == null) return;
 
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (W.IsReady() && useW.Enabled && input.Hitchance >= skill && target.IsValidTarget(W.Range))
+            if (W.IsReady() && useW.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(W.Range))
             {
                 W.Cast(input.UnitPosition);
             }
@@ -201,25 +178,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(E.Range);
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
             var input = E.GetPrediction(target);
-            var eFarmSet = Config["skillpred"].GetValue<MenuList>("echance").SelectedValue;
             if (target == null) return;
-            
-            string final = eFarmSet;
-            var skill = HitChance.High;
-            
-            if (final == "0") {
-                skill = HitChance.Low;
-            }
 
-            if (final == "1") {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2") {
-                skill = HitChance.High;
-            }
-
-            if (E.IsReady() && useE.Enabled && !Q.IsInRange(target) && input.Hitchance >= skill && target.IsValidTarget(E.Range))
+            if (E.IsReady() && useE.Enabled && !Q.IsInRange(target) && input.Hitchance >= HitChance.Medium && target.IsValidTarget(E.Range))
             {
                 E.Cast(input.UnitPosition);
             }

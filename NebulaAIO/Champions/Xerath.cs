@@ -59,13 +59,6 @@ namespace NebulaAio.Champions
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuKeyBind("Rkey", "R Key", Keys.T, KeyBindType.Press));
             menuM.Add(new MenuSlider("Cusor", "Cusor Range", 400, 0, 2000));
-            menuM.Add(new MenuBool("Agc", "E Antigapcloser"));
-
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("qchance", "Q HitChance:", new[] {"Low", "Medium", "High",}, 2));
-            menuH.Add(new MenuList("wchance", "W HitChance:", new[] {"Low", "Medium", "High",}, 2));
-            menuH.Add(new MenuList("echance", "E HitChance:", new[] {"Low", "Medium", "High",}, 2));
-            menuH.Add(new MenuList("rchance", "R HitChance:", new[] {"Low", "Medium", "High",}, 2));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -78,14 +71,13 @@ namespace NebulaAio.Champions
             Config.Add(menuL);
             Config.Add(menuK);
             Config.Add(menuM);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
-            AntiGapcloser.OnGapcloser += OnGapcloser;
+            AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Game.OnUpdate += Check;
         }
 
@@ -116,27 +108,8 @@ namespace NebulaAio.Champions
                             var target = targets.Find(i =>
                                 i.DistanceToCursor() <= Config["Misc"].GetValue<MenuSlider>("Cusor").Value);
                             var input = R.GetPrediction(target);
-                            var rFarmSet = Config["skillpred"].GetValue<MenuList>("rchance").SelectedValue;
 
-                            string final = rFarmSet;
-                            var skill = HitChance.High;
-
-                            if (final == "0")
-                            {
-                                skill = HitChance.Low;
-                            }
-
-                            if (final == "1")
-                            {
-                                skill = HitChance.Medium;
-                            }
-
-                            if (final == "2")
-                            {
-                                skill = HitChance.High;
-                            }
-
-                            if (target != null && input.Hitchance >= skill && !target.IsInvulnerable)
+                            if (target != null && input.Hitchance >= HitChance.High && !target.IsInvulnerable)
                             {
                                 R.Cast(input.UnitPosition);
                                 return;
@@ -190,13 +163,24 @@ namespace NebulaAio.Champions
             Killsteal();
         }
         
-        private static void OnGapcloser(AIBaseClient sender, AntiGapcloser.GapcloserArgs args)
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
         {
-            if (Config["Misc"].GetValue<MenuBool>("Agc").Enabled && E.IsReady() && sender.IsEnemy)
+            if (sender.IsAlly)
+                return;
+
+            if (args.SpellName == "ZedR")
+                return;
+
+            if (args.EndPosition.DistanceToPlayer() < args.StartPosition.DistanceToPlayer())
             {
-                if (sender.IsValidTarget(E.Range))
+                if(args.EndPosition.DistanceToPlayer() <= 300 && sender.IsValidTarget(E.Range))
                 {
-                    E.Cast(sender);
+                    if (E.Cast(sender) == CastStates.SuccessfullyCasted)
+                        return;
+                }
+                else
+                {
+                    return;
                 }
             }
         }
@@ -245,32 +229,13 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(Q.Range);
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
             var input = Q.GetPrediction(target);
-            var qFarmSet = Config["skillpred"].GetValue<MenuList>("qchance").SelectedValue;
             if (target == null) return;
 
-            string final = qFarmSet;
-            var skill = HitChance.High;
-
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (Q.IsReady() && useQ && target.IsValidTarget(Q.Range) && input.Hitchance >= skill)
+            if (Q.IsReady() && useQ && target.IsValidTarget(Q.Range) && input.Hitchance >= HitChance.High)
             {
                 Q.StartCharging();
                 {
-                    if (Q.IsChargedSpell && input.Hitchance >= skill)
+                    if (Q.IsChargedSpell && input.Hitchance >= HitChance.High)
                     {
                         Q.Cast(input.UnitPosition);
                     }
@@ -283,28 +248,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(W.Range);
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW").Enabled;
             var input = W.GetPrediction(target);
-            var wFarmSet = Config["skillpred"].GetValue<MenuList>("wchance").SelectedValue;
             if (target == null) return;
 
-            string final = wFarmSet;
-            var skill = HitChance.High;
-
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (W.IsReady() && useW && target.IsValidTarget(W.Range) && input.Hitchance >= skill)
+            if (W.IsReady() && useW && target.IsValidTarget(W.Range) && input.Hitchance >= HitChance.High)
             {
                 W.Cast(input.UnitPosition);
             }
@@ -315,29 +261,10 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(E.Range);
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE").Enabled;
             var input = E.GetPrediction(target);
-            var eFarmSet = Config["skillpred"].GetValue<MenuList>("echance").SelectedValue;
             if (target == null) return;
-
-            string final = eFarmSet;
-            var skill = HitChance.High;
-
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
+            
             if (E.IsReady() && useE && target.IsValidTarget(E.Range) && !target.HasBuffOfType(BuffType.SpellShield) &&
-                input.Hitchance >= skill)
+                input.Hitchance >= HitChance.High)
             {
                 E.Cast(input.UnitPosition);
             }

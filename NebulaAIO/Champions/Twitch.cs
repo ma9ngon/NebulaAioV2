@@ -46,9 +46,6 @@ namespace NebulaAio.Champions
             menuE.Add(new MenuBool("Estacks", "Use E When Target have Max Stacks", false));
             menuE.Add(new MenuBool("Edrake", "Use E To Drake/Baron Steal", true));
 
-            var menuM = new Menu("Misc", "Misc");
-            menuM.Add(new MenuBool("Agc", "W Antigapcloser"));
-
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
 
@@ -68,7 +65,7 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
-            AntiGapcloser.OnGapcloser += OnGapcloser;
+            AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -135,13 +132,24 @@ namespace NebulaAio.Champions
             }
         }
         
-        private static void OnGapcloser(AIBaseClient sender, AntiGapcloser.GapcloserArgs args)
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
         {
-            if (Config["Misc"].GetValue<MenuBool>("Agc").Enabled && W.IsReady() && sender.IsEnemy)
+            if (sender.IsAlly)
+                return;
+
+            if (args.SpellName == "ZedR")
+                return;
+
+            if (args.EndPosition.DistanceToPlayer() < args.StartPosition.DistanceToPlayer())
             {
-                if (sender.IsValidTarget(W.Range))
+                if(args.EndPosition.DistanceToPlayer() <= 300 && sender.IsValidTarget(W.Range))
                 {
-                    W.Cast(sender);
+                    if (W.Cast(sender) == CastStates.SuccessfullyCasted)
+                        return;
+                }
+                else
+                {
+                    return;
                 }
             }
         }

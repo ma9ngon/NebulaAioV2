@@ -53,13 +53,7 @@ namespace NebulaAio.Champions
             
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("rdrake", "Drake/Baron steal"));
-            menuM.Add(new MenuBool("Agc", "Q Antigapcloser"));
             menuM.Add(new MenuBool("bc", "Auto Burst Combo"));
-
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("qchance", "Q HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("echance", "E HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -73,14 +67,13 @@ namespace NebulaAio.Champions
             Config.Add(menuL);
             Config.Add(menuK);
             Config.Add(menuM);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
-            AntiGapcloser.OnGapcloser += OnGapcloser;
+            AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -115,13 +108,24 @@ namespace NebulaAio.Champions
             LogicW();
         }
 
-        private static void OnGapcloser(AIBaseClient sender, AntiGapcloser.GapcloserArgs args)
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
         {
-            if (Config["Misc"].GetValue<MenuBool>("Agc").Enabled && Q.IsReady() && sender.IsEnemy)
+            if (sender.IsAlly)
+                return;
+
+            if (args.SpellName == "ZedR")
+                return;
+
+            if (args.EndPosition.DistanceToPlayer() < args.StartPosition.DistanceToPlayer())
             {
-                if (sender.IsValidTarget(Q.Range))
+                if(args.EndPosition.DistanceToPlayer() <= 300 && sender.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(sender);
+                    if (Q.Cast(sender) == CastStates.SuccessfullyCasted)
+                        return;
+                }
+                else
+                {
+                    return;
                 }
             }
         }
@@ -203,23 +207,7 @@ namespace NebulaAio.Champions
             var input = E.GetPrediction(target);
             if (target == null) return;
 
-            var eFarmSet = Config["skillpred"].GetValue<MenuList>("echance").SelectedValue;
-            string final = eFarmSet;
-            var skill = HitChance.High;
-            
-            if (final == "0") {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1") {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2") {
-                skill = HitChance.High;
-            }
-            
-            if (input.Hitchance >= skill && target.IsValidTarget(E.Range) && useE)
+            if (input.Hitchance >= HitChance.High && target.IsValidTarget(E.Range) && useE)
             {
                 E.Cast(input.UnitPosition);
             }
@@ -236,30 +224,12 @@ namespace NebulaAio.Champions
                 new List<Vector2> {input.CastPosition.ToVector2()});
             var minions = col.Where(x => !(x is AIHeroClient)).OrderBy(x => x.IsMinion()).Take(2)
                 .Count(x => x.IsMinion());
-
-            var qFarmSet = Config["skillpred"].GetValue<MenuList>("qchance").SelectedValue;
-            string final = qFarmSet;
-            var skill = HitChance.High;
+            
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
-
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
 
             if (minions < 2)
             {
-                if (input.Hitchance >= skill && useQ && target.IsValidTarget(Q.Range))
+                if (input.Hitchance >= HitChance.High && useQ && target.IsValidTarget(Q.Range))
                 {
                     Q.Cast(input.UnitPosition);
                     LogicW();

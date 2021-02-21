@@ -52,11 +52,6 @@ namespace NebulaAio.Champions
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
 
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("qchance", "Q HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("wchance", "W HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("rchance", "R HitChance:", new[] { "Low", "Medium", "High", }, 2));
-
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -68,7 +63,6 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuL);
             Config.Add(menuK);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
@@ -145,33 +139,15 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(R.Range);
             var input = R.GetPrediction(target);
-            var rFarmSet = Config["skillpred"].GetValue<MenuList>("rchance").SelectedValue;
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR").Enabled;
-            string final = rFarmSet;
-            var skill = HitChance.High;
             if (target == null) return;
 
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (input.Hitchance >= skill && !target.IsInvulnerable && R.IsInRange(target) && useR && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
+            if (input.Hitchance >= HitChance.High && !target.IsInvulnerable && R.IsInRange(target) && useR && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
             {
                 R.Cast(input.UnitPosition);
             }
 
-            if (input.Hitchance >= skill && !target.IsInvulnerable && R.IsInRange(target) && useR &&
+            if (input.Hitchance >= HitChance.High && !target.IsInvulnerable && R.IsInRange(target) && useR &&
                 Q.GetDamage(target) + W.GetDamage(target) + R.GetDamage(target) >= target.Health)
             {
                 R.Cast(input.UnitPosition);
@@ -184,29 +160,11 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(W.Range);
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW");
             var input = W.GetPrediction(target);
-            var wFarmSet = Config["skillpred"].GetValue<MenuList>("wchance").SelectedValue;
-            string final = wFarmSet;
-            var skill = HitChance.High;
             if (target == null) return;
-
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
 
             if (!useW.Enabled) return;
 
-            if (W.IsReady() && input.Hitchance >= skill)
+            if (W.IsReady() && input.Hitchance >= HitChance.High)
             {
                 W.StartCharging();
 
@@ -241,28 +199,10 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(Q.Range);
             var input = Q.GetPrediction(target);
-            var qFarmSet = Config["skillpred"].GetValue<MenuList>("qchance").SelectedValue;
-            string final = qFarmSet;
-            var skill = HitChance.High;
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
             if (target == null) return;
 
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (input.Hitchance >= skill && useQ && Q.IsInRange(target))
+            if (input.Hitchance >= HitChance.High && useQ && Q.IsInRange(target))
             {
                 Q.Cast(input.UnitPosition);
             }

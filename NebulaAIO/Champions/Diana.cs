@@ -55,9 +55,6 @@ namespace NebulaAio.Champions
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("Estack", "Use E Only When Q Hitted"));
 
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("qchance", "Q HitChance:", new[] { "Low", "Medium", "High", }, 2));
-
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -70,7 +67,6 @@ namespace NebulaAio.Champions
             Config.Add(menuL);
             Config.Add(menuK);
             Config.Add(menuM);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
@@ -207,25 +203,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(1000);
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ");
             var input = Q.GetPrediction(target);
-            var qFarmSet = Config["skillpred"].GetValue<MenuList>("qchance").SelectedValue;
             if (target == null) return;
-            
-            string final = qFarmSet;
-            var skill = HitChance.High;
-            
-            if (final == "0") {
-                skill = HitChance.Low;
-            }
 
-            if (final == "1") {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2") {
-                skill = HitChance.High;
-            }
-
-            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= skill && target.IsValidTarget(Q.Range))
+            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(Q.Range))
             {
                 Q.Cast(input.UnitPosition);
             }

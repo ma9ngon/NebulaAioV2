@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Media;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Policy;
 
 namespace NebulaAio.Champions
@@ -15,7 +16,6 @@ namespace NebulaAio.Champions
     {
         private static Spell Q, W, E, R;
         private static Menu Config;
-        private static bool RavenForm;
 
         public static void OnGameLoad()
         {
@@ -53,10 +53,6 @@ namespace NebulaAio.Champions
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
 
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("wchance", "W HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("echance", "E HitChance:", new[] { "Low", "Medium", "High", }, 0));
-
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -68,15 +64,13 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuL);
             Config.Add(menuK);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
-            GameObject.OnCreate += OnCreateObject;
-            GameObject.OnDelete += OnDeleteObject;
+            AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -90,10 +84,10 @@ namespace NebulaAio.Champions
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
+                LogicR();
                 LogicE();
                 LogicW();
                 LogicQ();
-                LogicR();
             }
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.LaneClear)
@@ -112,20 +106,6 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
-        }
-
-        private static void OnCreateObject(GameObject sender, EventArgs args)
-        {
-            if (!(sender.Name.Contains("swain_demonForm")))
-                return;
-            RavenForm = true;
-        }
-        
-        private static void OnDeleteObject(GameObject sender, EventArgs args)
-        {
-            if (!(sender.Name.Contains("swain_demonForm")))
-                return;
-            RavenForm = false;
         }
 
         private static void OnDraw(EventArgs args)
@@ -151,6 +131,28 @@ namespace NebulaAio.Champions
             }
         }
 
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
+        {
+            if (sender.IsAlly)
+                return;
+
+            if (args.SpellName == "ZedR")
+                return;
+
+            if (args.EndPosition.DistanceToPlayer() < args.StartPosition.DistanceToPlayer())
+            {
+                if(args.EndPosition.DistanceToPlayer() <= 300 && sender.IsValidTarget(E.Range))
+                {
+                    if (E.Cast(sender) == CastStates.SuccessfullyCasted)
+                        return;
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+
         private static void LogicR()
         {
             var target = TargetSelector.GetTarget(1000);
@@ -158,11 +160,11 @@ namespace NebulaAio.Champions
             var combor = Config["Csettings"].GetValue<MenuSlider>("rcount").Value;
             if (target == null) return;
 
-            if (R.IsReady() && useR.Enabled && RavenForm == false && ObjectManager.Player.CountEnemyHeroesInRange(R.Range) >= combor)
+            if (R.IsReady() && useR.Enabled && !ObjectManager.Player.HasBuff("SwainR") && ObjectManager.Player.CountEnemyHeroesInRange(R.Range) >= combor)
             {
                 R.Cast();
             }
-            else if (R.IsReady() && useR.Enabled && RavenForm == true &&
+            else if (R.IsReady() && useR.Enabled && ObjectManager.Player.HasBuff("SwainR") &&
                      ObjectManager.Player.CountEnemyHeroesInRange(R.Range) >= combor &&
                      R.GetDamage(target) >= target.Health)
             {
@@ -175,27 +177,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(W.Range);
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW");
             var input = W.GetPrediction(target);
-            var wFarmSet = Config["skillpred"].GetValue<MenuList>("wchance").SelectedValue;
-            string final = wFarmSet;
-            var skill = HitChance.High;
             if (target == null) return;
 
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (W.IsReady() && useW.Enabled && input.Hitchance >= skill && target.IsValidTarget(W.Range))
+            if (W.IsReady() && useW.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(W.Range))
             {
                 W.Cast(input.UnitPosition);
             }
@@ -206,25 +190,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(E.Range);
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
             var input = E.GetPrediction(target);
-            var eFarmSet = Config["skillpred"].GetValue<MenuList>("echance").SelectedValue;
             if (target == null) return;
-            
-            string final = eFarmSet;
-            var skill = HitChance.High;
-            
-            if (final == "0") {
-                skill = HitChance.Low;
-            }
 
-            if (final == "1") {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2") {
-                skill = HitChance.High;
-            }
-
-            if (E.IsReady() && useE.Enabled && input.Hitchance >= skill && target.IsValidTarget(E.Range))
+            if (E.IsReady() && useE.Enabled && !target.HasBuffOfType(BuffType.SpellShield) && input.Hitchance >= HitChance.High && target.IsValidTarget(E.Range))
             {
                 E.Cast(input.UnitPosition);
             }

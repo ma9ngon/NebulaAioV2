@@ -52,11 +52,6 @@ namespace NebulaAio.Champions
             menuM.Add(new MenuKeyBind("semiR", "Semi R", Keys.T, KeyBindType.Press));
             menuM.Add(new MenuSlider("Rrange", "R Range Slider", 2500, 0, 25000));
 
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("qchance", "q HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("wchance", "W HitChance:", new[] { "Low", "Medium", "High", }, 2));
-            menuH.Add(new MenuList("rchance", "E HitChance:", new[] { "Low", "Medium", "High", }, 2));
-
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -69,7 +64,6 @@ namespace NebulaAio.Champions
             Config.Add(menuL);
             Config.Add(menuK);
             Config.Add(menuM);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
@@ -142,28 +136,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(1000);
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR");
             var input = R.GetPrediction(target);
-            var rFarmSet = Config["skillpred"].GetValue<MenuList>("rchance").SelectedValue;
             if (target == null) return;
-            
-            string final = rFarmSet;
-            var skill = HitChance.High;
-            
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
 
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-            
-            if (R.IsReady() && useR.Enabled && input.Hitchance >= skill && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
+            if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
                 R.Cast(input.UnitPosition);
             }
@@ -174,27 +149,9 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(W.Range);
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW");
             var input = W.GetPrediction(target);
-            var wFarmSet = Config["skillpred"].GetValue<MenuList>("wchance").SelectedValue;
-            string final = wFarmSet;
-            var skill = HitChance.High;
             if (target == null) return;
 
-            if (final == "0")
-            {
-                skill = HitChance.Low;
-            }
-
-            if (final == "1")
-            {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2")
-            {
-                skill = HitChance.High;
-            }
-
-            if (W.IsReady() && useW.Enabled && input.Hitchance >= skill && target.IsValidTarget(W.Range))
+            if (W.IsReady() && useW.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(W.Range))
             {
                 W.Cast(input.UnitPosition);
             }

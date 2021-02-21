@@ -50,11 +50,7 @@ namespace NebulaAio.Champions
             menuK.Add(new MenuBool("KsW", "Use W to Killsteal"));
             menuK.Add(new MenuBool("KsR", "Use R to Killsteal", false));
 
-            var menuH = new Menu("skillpred", "SkillShot HitChance ");
-            menuH.Add(new MenuList("rchance", "R HitChance:", new[] { "Low", "Medium", "High", }, 2));
-
             var menuM = new Menu("Misc", "Misc");
-            menuM.Add(new MenuBool("Agc", "R Antigapcloser"));
             menuM.Add(new MenuBool("inter", "R interrupt"));
             menuM.Add(new MenuKeyBind("semiR", "Semi R", Keys.T, KeyBindType.Press));
             menuM.Add(new MenuSlider("Rrange", "R Range Slider", 2500, 0, 25000));
@@ -71,14 +67,13 @@ namespace NebulaAio.Champions
             Config.Add(menuL);
             Config.Add(menuK);
             Config.Add(menuM);
-            Config.Add(menuH);
             Config.Add(menuD);
 
             Config.Attach();
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
-            AntiGapcloser.OnGapcloser += OnGapcloser;
+            AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Interrupter.OnInterrupterSpell += OnInterruptible;
         }
 
@@ -141,13 +136,24 @@ namespace NebulaAio.Champions
             }
         }
         
-        private static void OnGapcloser(AIBaseClient sender, AntiGapcloser.GapcloserArgs args)
+        private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
         {
-            if (Config["Misc"].GetValue<MenuBool>("Agc").Enabled && R.IsReady() && sender.IsEnemy)
+            if (sender.IsAlly)
+                return;
+
+            if (args.SpellName == "ZedR")
+                return;
+
+            if (args.EndPosition.DistanceToPlayer() < args.StartPosition.DistanceToPlayer())
             {
-                if (sender.IsValidTarget(R.Range))
+                if(args.EndPosition.DistanceToPlayer() <= 300 && sender.IsValidTarget(500))
                 {
-                    R.Cast(sender);
+                    if (R.Cast(sender) == CastStates.SuccessfullyCasted)
+                        return;
+                }
+                else
+                {
+                    return;
                 }
             }
         }
@@ -180,30 +186,14 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(1000);
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR");
             var input = R.GetPrediction(target);
-            var rFarmSet = Config["skillpred"].GetValue<MenuList>("rchance").SelectedValue;
             if (target == null) return;
-            
-            string final = rFarmSet;
-            var skill = HitChance.High;
-            
-            if (final == "0") {
-                skill = HitChance.Low;
-            }
 
-            if (final == "1") {
-                skill = HitChance.Medium;
-            }
-
-            if (final == "2") {
-                skill = HitChance.High;
-            }
-
-            if (R.IsReady() && input.Hitchance >= skill && useR.Enabled && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
+            if (R.IsReady() && input.Hitchance >= HitChance.High && useR.Enabled && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
                 R.Cast(input.UnitPosition);
             }
             
-            if (R.IsReady() && useR.Enabled && input.Hitchance >= skill && R.GetDamage(target) + W.GetDamage(target) >= target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
+            if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && R.GetDamage(target) + W.GetDamage(target) >= target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
                 R.Cast(input.UnitPosition);
             }
