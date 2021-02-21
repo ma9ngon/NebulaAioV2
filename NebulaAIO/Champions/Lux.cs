@@ -166,8 +166,8 @@ namespace NebulaAio.Champions
                 target.IsValidTarget(E.Range) &&
                 Q.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && Q.IsReady() && E.IsReady() && R.IsReady() && !target.IsInvulnerable)
             {
-                E.Cast(inputt.UnitPosition);
                 Q.Cast(input.UnitPosition);
+                E.Cast(inputt.UnitPosition);
                 R.Cast(inputtt.UnitPosition);
             }
 

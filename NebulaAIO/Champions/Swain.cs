@@ -166,7 +166,7 @@ namespace NebulaAio.Champions
             }
             else if (R.IsReady() && useR.Enabled && ObjectManager.Player.HasBuff("SwainR") &&
                      ObjectManager.Player.CountEnemyHeroesInRange(R.Range) >= combor &&
-                     R.GetDamage(target) >= target.Health)
+                     R.GetDamage(target) + Q.GetDamage(target) >= target.Health)
             {
                 R.Cast();
             }
