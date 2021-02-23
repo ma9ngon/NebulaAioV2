@@ -59,6 +59,7 @@ namespace NebulaAio.Champions
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuKeyBind("Rkey", "R Key", Keys.T, KeyBindType.Press));
             menuM.Add(new MenuSlider("Cusor", "Cusor Range", 400, 0, 2000));
+            menuM.Add(new MenuBool("Qslow", "Q Slow Pred", true));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -131,10 +132,10 @@ namespace NebulaAio.Champions
 
             if (Q.IsCharging)
                 Orbwalker.AttackEnabled = false;
-            else
-            {
+            
+            if (Q.IsChargedSpell)
                 Orbwalker.AttackEnabled = true;
-            }
+            
 
             Orbwalker.MoveEnabled = true;
 
@@ -228,16 +229,33 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(Q.Range);
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
+            var slowpred = Config["Misc"].GetValue<MenuBool>("Qslow").Enabled;
             var input = Q.GetPrediction(target);
             if (target == null) return;
 
-            if (Q.IsReady() && useQ && target.IsValidTarget(Q.Range) && input.Hitchance >= HitChance.High)
+            if (Q.IsReady() && useQ && !slowpred && target.IsValidTarget(Q.Range) && input.Hitchance >= HitChance.High)
             {
                 Q.StartCharging();
                 {
                     if (Q.IsChargedSpell && input.Hitchance >= HitChance.High)
                     {
                         Q.Cast(input.UnitPosition);
+                    }
+                }
+            }
+            else if (Q.IsReady() && useQ && slowpred)
+            {
+                Q.StartCharging();
+                {
+                    if (Q.IsCharging)
+                    {
+                        if (Q.IsChargedSpell && target.IsValidTarget(Q.ChargedMaxRange))
+                        {
+                            if (input.Hitchance >= HitChance.VeryHigh)
+                            {
+                                Q.ShootChargedSpell(input.UnitPosition);
+                            }
+                        }
                     }
                 }
             }

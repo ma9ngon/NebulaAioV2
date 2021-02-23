@@ -47,6 +47,7 @@ namespace NebulaAio.Champions
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcQ", "Use Q in Lanclear"));
             menuL.Add(new MenuBool("JcQ", "Use Q in Jungleclear"));
+            menuL.Add(new MenuBool("JcW", "Use W in Jungleclear"));
             menuL.Add(new MenuBool("JcE", "Use E in Jungleclear"));
             
             var menuK = new Menu("Killsteal", "Killsteal");
@@ -211,12 +212,23 @@ namespace NebulaAio.Champions
         private static void Jungle()
         {
             var JcEe = Config["Clear"].GetValue<MenuBool>("JcE");
+            var JcWw = Config["Clear"].GetValue<MenuBool>("JcW");
             var JcQq = Config["Clear"].GetValue<MenuBool>("JcQ");
             var mobs = GameObjects.Jungle.Where(x => x.IsValidTarget(E.Range)).OrderBy(x => x.MaxHealth)
                 .ToList<AIBaseClient>();
             if (mobs.Count > 0)
             {
                 var mob = mobs[0];
+                if (JcWw.Enabled && W.IsReady() && ObjectManager.Player.Distance(mob.Position) < W.ChargedMaxRange)
+                {
+                    W.StartCharging();
+                    {
+                        if (W.IsChargedSpell)
+                        {
+                            W.Cast(mob);
+                        }
+                    }
+                }
                 if (JcEe.Enabled && E.IsReady() && ObjectManager.Player.Distance(mob.Position) < E.Range) E.Cast(mob);
                 if (JcQq.Enabled && Q.IsReady() &&  ObjectManager.Player.Distance(mob.Position) < Q.Range) Q.Cast(mob.Position);
             }
