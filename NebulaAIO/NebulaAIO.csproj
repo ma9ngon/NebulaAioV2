@@ -66,6 +66,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Alistar.cs" />
+    <Compile Include="Champions\Amumu.cs" />
     <Compile Include="Champions\Annie.cs" />
     <Compile Include="Champions\Ashe.cs" />
     <Compile Include="Champions\Blitzcrank.cs" />
