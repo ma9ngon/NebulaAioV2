@@ -46,6 +46,7 @@ namespace NebulaAio.Champions
 
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("QAG", "Q Antigapcloser"));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcQ", "Use Q in Lanclear"));
@@ -107,6 +108,7 @@ namespace NebulaAio.Champions
             }
             Killsteal();
             AutoR();
+            skind();
         }
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
@@ -128,6 +130,17 @@ namespace NebulaAio.Champions
                 {
                     return;
                 }
+            }
+        }
+
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
             }
         }
 

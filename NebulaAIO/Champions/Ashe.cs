@@ -54,6 +54,7 @@ namespace NebulaAio.Champions
             menuM.Add(new MenuBool("inter", "R interrupt"));
             menuM.Add(new MenuKeyBind("semiR", "Semi R", Keys.T, KeyBindType.Press));
             menuM.Add(new MenuSlider("Rrange", "R Range Slider", 2500, 0, 25000));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -114,6 +115,7 @@ namespace NebulaAio.Champions
             }
             LogicE();
             Killsteal();
+            skind();
         }
 
         private static void SemiR()
@@ -132,7 +134,7 @@ namespace NebulaAio.Champions
             {
                 var pred = R.GetPrediction(sender);
 
-                if (pred != null && pred.Hitchance >= HitChance.High) R.Cast(pred.UnitPosition);
+                if (pred != null && pred.Hitchance >= HitChance.High) R.Cast(pred.CastPosition);
             }
         }
         
@@ -155,6 +157,17 @@ namespace NebulaAio.Champions
                 {
                     return;
                 }
+            }
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
             }
         }
 
@@ -190,12 +203,12 @@ namespace NebulaAio.Champions
 
             if (R.IsReady() && input.Hitchance >= HitChance.High && useR.Enabled && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
             
             if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && R.GetDamage(target) + W.GetDamage(target) >= target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
         }
 

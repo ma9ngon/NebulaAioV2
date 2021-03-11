@@ -48,6 +48,7 @@ namespace NebulaAio.Champions
 
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("AW", "Auto turn off W"));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
             
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
@@ -106,6 +107,7 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
+            skind();
         }
 
         private static void AutoW()
@@ -119,6 +121,17 @@ namespace NebulaAio.Champions
                 {
                     W.Cast();
                 }
+            }
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
             }
         }
 
@@ -208,7 +221,7 @@ namespace NebulaAio.Champions
             {
                 if (input.Hitchance >= HitChance.High)
                 {
-                    Q.Cast(input.UnitPosition);
+                    Q.Cast(input.CastPosition);
                 }
             }
         }

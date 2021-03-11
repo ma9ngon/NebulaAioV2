@@ -51,6 +51,9 @@ namespace NebulaAio.Champions
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
             menuK.Add(new MenuBool("KsR", "Use R to Killsteal"));
 
+            var menuM = new Menu("Misc", "Misc");
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
+
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawE", "E Range (White)", true));
@@ -61,6 +64,7 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuL);
             Config.Add(menuK);
+            Config.Add(menuM);
             Config.Add(menuD);
 
             Config.Attach();
@@ -97,6 +101,7 @@ namespace NebulaAio.Champions
             }
             BigRocket();
             Killsteal();
+            skind();
         }
         
         private static void BigRocket()
@@ -112,6 +117,17 @@ namespace NebulaAio.Champions
                 R.Range = 1300;
                 R.Width = 150f;
                 BoolCorkiBigR = false;
+            }
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
             }
         }
 
@@ -145,7 +161,7 @@ namespace NebulaAio.Champions
             {
                 if (input.Hitchance >= HitChance.High)
                 {
-                    R.Cast(input.UnitPosition);
+                    R.Cast(input.CastPosition);
                 }
             }
 
@@ -154,7 +170,7 @@ namespace NebulaAio.Champions
             {
                 if (input.Hitchance >= HitChance.High)
                 {
-                    R.Cast(input.UnitPosition);
+                    R.Cast(input.CastPosition);
                 }
             }
 
@@ -162,7 +178,7 @@ namespace NebulaAio.Champions
             {
                 if (input.Hitchance >= HitChance.High)
                 {
-                    R.Cast(input.UnitPosition);
+                    R.Cast(input.CastPosition);
                 }
             }
         }
@@ -191,7 +207,7 @@ namespace NebulaAio.Champions
             {
                 if (input.Hitchance >= HitChance.High)
                 {
-                    Q.Cast(input.UnitPosition);
+                    Q.Cast(input.CastPosition);
                 }
             }
         }

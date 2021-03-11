@@ -55,6 +55,7 @@ namespace NebulaAio.Champions
 
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("Epoison", "E only When Enemy is Poisoned"));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -104,6 +105,18 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
+            skind();
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -145,12 +158,12 @@ namespace NebulaAio.Champions
 
             if (R.IsReady() && useR.Enabled && target.IsBothFacing(GameObjects.Player) && GameObjects.Player.CountEnemyHeroesInRange(400f) > 1 && input.Hitchance >= HitChance.High)
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
             
             if (R.IsReady() && useR.Enabled && R.GetDamage(target) + Q.GetDamage(target) + E.GetDamage(target) + W.GetDamage(target) >= target.Health && input.Hitchance >= HitChance.High)
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
         }
 
@@ -193,9 +206,9 @@ namespace NebulaAio.Champions
             if (target == null) return;
             
 
-            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(Q.Range))
+            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= HitChance.High && !target.HasBuffOfType(BuffType.Poison) && target.IsValidTarget(Q.Range))
             {
-                Q.Cast(input.UnitPosition);
+                Q.Cast(input.CastPosition);
             }
         }
 

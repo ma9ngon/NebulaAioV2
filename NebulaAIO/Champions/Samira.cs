@@ -52,6 +52,7 @@ namespace NebulaAio.Champions
 
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("Wblock", "use W To Block Spells/AA"));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -115,6 +116,18 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
+            skind();
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
         }
         
         private static void OnDraw(EventArgs args)
@@ -217,7 +230,7 @@ namespace NebulaAio.Champions
 
             if (Q.IsReady() && useQ.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(Q.Range))
             {
-                Q.Cast(input.UnitPosition);
+                Q.Cast(input.CastPosition);
             }
         }
 

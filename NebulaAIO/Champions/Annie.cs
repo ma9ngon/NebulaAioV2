@@ -51,6 +51,7 @@ namespace NebulaAio.Champions
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("aes", "Auto Cast E To Get Last Passive Stack"));
             menuM.Add(new MenuBool("asf", "Auto Stack Passive In fountain"));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
@@ -109,6 +110,18 @@ namespace NebulaAio.Champions
             EStack();
             Shield();
             Killsteal();
+            skind();
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -157,7 +170,7 @@ namespace NebulaAio.Champions
                 var rpred = R.GetPrediction(target, false, 0);
                 if (rpred.Hitchance >= HitChance.High)
                 {
-                    R.Cast(rpred.UnitPosition);
+                    R.Cast(rpred.CastPosition);
                 }
             }
         }

@@ -54,6 +54,7 @@ namespace NebulaAio.Champions
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuBool("rdrake", "Drake/Baron steal"));
             menuM.Add(new MenuBool("bc", "Auto Burst Combo"));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -106,6 +107,7 @@ namespace NebulaAio.Champions
             steal();
             Killsteal();
             LogicW();
+            skind();
         }
 
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
@@ -127,6 +129,17 @@ namespace NebulaAio.Champions
                 {
                     return;
                 }
+            }
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
             }
         }
 
@@ -166,9 +179,9 @@ namespace NebulaAio.Champions
                 target.IsValidTarget(E.Range) &&
                 Q.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && Q.IsReady() && E.IsReady() && R.IsReady() && !target.IsInvulnerable)
             {
-                Q.Cast(input.UnitPosition);
-                E.Cast(inputt.UnitPosition);
-                R.Cast(inputtt.UnitPosition);
+                Q.Cast(input.CastPosition);
+                E.Cast(inputt.CastPosition);
+                R.Cast(inputtt.CastPosition);
             }
 
         }
@@ -183,7 +196,7 @@ namespace NebulaAio.Champions
             if (input.Hitchance >= HitChance.High && useR.Enabled && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && !target.IsInvulnerable &&
                 target.IsValidTarget(R.Range))
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
         }
 
@@ -209,7 +222,7 @@ namespace NebulaAio.Champions
 
             if (input.Hitchance >= HitChance.High && target.IsValidTarget(E.Range) && useE)
             {
-                E.Cast(input.UnitPosition);
+                E.Cast(input.CastPosition);
             }
         }
 
@@ -231,7 +244,7 @@ namespace NebulaAio.Champions
             {
                 if (input.Hitchance >= HitChance.High && useQ && target.IsValidTarget(Q.Range))
                 {
-                    Q.Cast(input.UnitPosition);
+                    Q.Cast(input.CastPosition);
                     LogicW();
                 }
             }

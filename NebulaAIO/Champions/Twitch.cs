@@ -49,6 +49,9 @@ namespace NebulaAio.Champions
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
 
+            var menuM = new Menu("Misc", "Misc");
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
+
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
             menuD.Add(new MenuBool("drawE", "E Range (White)", true));
@@ -59,6 +62,7 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuE);
             Config.Add(menuK);
+            Config.Add(menuM);
             Config.Add(menuD);
 
             Config.Attach();
@@ -95,6 +99,18 @@ namespace NebulaAio.Champions
             }
             steal();
             Killsteal();
+            skind();
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -182,7 +198,7 @@ namespace NebulaAio.Champions
                 var wPred = W.GetPrediction(target);
                 if (wPred.Hitchance >= HitChance.High)
                 {
-                    W.Cast(wPred.UnitPosition);
+                    W.Cast(wPred.CastPosition);
                 }
             }
         }

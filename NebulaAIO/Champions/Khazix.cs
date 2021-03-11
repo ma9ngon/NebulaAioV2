@@ -54,6 +54,9 @@ namespace NebulaAio.Champions
             menuK.Add(new MenuBool("KsW", "Use W to Killsteal"));
             menuK.Add(new MenuBool("KsE", "Use E to Killsteal"));
 
+            var menuM = new Menu("Misc", "Misc");
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
+
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -65,6 +68,7 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuL);
             Config.Add(menuK);
+            Config.Add(menuM);
             Config.Add(menuD);
 
             Config.Attach();
@@ -102,6 +106,7 @@ namespace NebulaAio.Champions
             }
             EvoSpells();
             Killsteal();
+            skind();
         }
 
         private static void EvoSpells()
@@ -116,6 +121,17 @@ namespace NebulaAio.Champions
             {
                 E.Range = 900f;
                 BoolEvolvedE = true;
+            }
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
             }
         }
 
@@ -169,7 +185,7 @@ namespace NebulaAio.Champions
 
             if (W.IsReady() && useW.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(W.Range))
             {
-                W.Cast(input.UnitPosition);
+                W.Cast(input.CastPosition);
             }
         }
 
@@ -182,7 +198,7 @@ namespace NebulaAio.Champions
 
             if (E.IsReady() && useE.Enabled && !Q.IsInRange(target) && input.Hitchance >= HitChance.Medium && target.IsValidTarget(E.Range))
             {
-                E.Cast(input.UnitPosition);
+                E.Cast(input.CastPosition);
             }
         }
         

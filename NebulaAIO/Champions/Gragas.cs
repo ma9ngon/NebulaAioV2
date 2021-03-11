@@ -57,6 +57,7 @@ namespace NebulaAio.Champions
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuKeyBind("InsecMode", "Insec Mode - Leftclick The Target You Want To Insec", Keys.T,
                 KeyBindType.Press));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
             
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
@@ -174,6 +175,7 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
+            skind();
         }
 
         private static void InsecCombo()
@@ -238,6 +240,17 @@ namespace NebulaAio.Champions
             CollisionFlags collisionFlags = NavMesh.GetCollisionFlags(pos);
             return (collisionFlags == CollisionFlags.Wall);
         }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
+        }
 
         private static void OnDraw(EventArgs args)
         {
@@ -290,13 +303,13 @@ namespace NebulaAio.Champions
 
             if (E.IsReady() && useE.Enabled && ObjectManager.Player.HasBuff("GragasWAttackBuff") && input.Hitchance >= HitChance.Medium && target.IsValidTarget(E.Range))
             {
-                E.Cast(input.UnitPosition);
+                E.Cast(input.CastPosition);
             }
 
             if (E.IsReady() && useE.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(E.Range) &&
                 Q.GetDamage(target) + W.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health)
             {
-                E.Cast(input.UnitPosition);
+                E.Cast(input.CastPosition);
             }
         }
         
@@ -310,7 +323,7 @@ namespace NebulaAio.Champions
 
             if (Q.IsReady() && useQ.Enabled && input.Hitchance >= HitChance.High && Barrel == null && target.IsValidTarget(Q.Range))
             {
-                Q.Cast(input.UnitPosition);
+                Q.Cast(input.CastPosition);
             }
         }
 

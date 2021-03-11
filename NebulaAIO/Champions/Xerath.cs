@@ -60,6 +60,7 @@ namespace NebulaAio.Champions
             menuM.Add(new MenuKeyBind("Rkey", "R Key", Keys.T, KeyBindType.Press));
             menuM.Add(new MenuSlider("Cusor", "Cusor Range", 400, 0, 2000));
             menuM.Add(new MenuBool("Qslow", "Q Slow Pred", true));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -112,7 +113,7 @@ namespace NebulaAio.Champions
 
                             if (target != null && input.Hitchance >= HitChance.High && !target.IsInvulnerable)
                             {
-                                R.Cast(input.UnitPosition);
+                                R.Cast(input.CastPosition);
                                 return;
                             }
                             else
@@ -162,6 +163,7 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
+            skind();
         }
         
         private static void Gapcloser_OnGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
@@ -193,6 +195,17 @@ namespace NebulaAio.Champions
 
             if (ObjectManager.Player.HasBuff("XerathArcanopulseChargeUp"))
                 ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -239,7 +252,7 @@ namespace NebulaAio.Champions
                 {
                     if (Q.IsChargedSpell && input.Hitchance >= HitChance.High)
                     {
-                        Q.Cast(input.UnitPosition);
+                        Q.Cast(input.CastPosition);
                     }
                 }
             }
@@ -253,7 +266,7 @@ namespace NebulaAio.Champions
                         {
                             if (input.Hitchance >= HitChance.VeryHigh)
                             {
-                                Q.ShootChargedSpell(input.UnitPosition);
+                                Q.ShootChargedSpell(input.CastPosition);
                             }
                         }
                     }
@@ -270,7 +283,7 @@ namespace NebulaAio.Champions
 
             if (W.IsReady() && useW && target.IsValidTarget(W.Range) && input.Hitchance >= HitChance.High)
             {
-                W.Cast(input.UnitPosition);
+                W.Cast(input.CastPosition);
             }
         }
 
@@ -284,7 +297,7 @@ namespace NebulaAio.Champions
             if (E.IsReady() && useE && target.IsValidTarget(E.Range) && !target.HasBuffOfType(BuffType.SpellShield) &&
                 input.Hitchance >= HitChance.High)
             {
-                E.Cast(input.UnitPosition);
+                E.Cast(input.CastPosition);
             }
         }
 

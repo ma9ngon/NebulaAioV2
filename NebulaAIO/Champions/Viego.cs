@@ -53,6 +53,9 @@ namespace NebulaAio.Champions
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
 
+            var menuM = new Menu("Misc", "Misc");
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
+
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
@@ -64,6 +67,7 @@ namespace NebulaAio.Champions
             Config.Add(menuC);
             Config.Add(menuL);
             Config.Add(menuK);
+            Config.Add(menuM);
             Config.Add(menuD);
 
             Config.Attach();
@@ -110,6 +114,18 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
+            skind();
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -145,13 +161,13 @@ namespace NebulaAio.Champions
 
             if (input.Hitchance >= HitChance.High && !target.IsInvulnerable && R.IsInRange(target) && useR && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
 
             if (input.Hitchance >= HitChance.High && !target.IsInvulnerable && R.IsInRange(target) && useR &&
                 Q.GetDamage(target) + W.GetDamage(target) + R.GetDamage(target) >= target.Health)
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
         }
         
@@ -176,7 +192,7 @@ namespace NebulaAio.Champions
                     {
                         if (W.IsChargedSpell)
                         {
-                            W.Cast(input.UnitPosition);
+                            W.Cast(input.CastPosition);
                         }
                     }
                 }
@@ -205,7 +221,7 @@ namespace NebulaAio.Champions
 
             if (input.Hitchance >= HitChance.High && useQ && Q.IsInRange(target))
             {
-                Q.Cast(input.UnitPosition);
+                Q.Cast(input.CastPosition);
             }
         }
 

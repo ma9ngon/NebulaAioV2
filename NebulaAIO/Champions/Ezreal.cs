@@ -51,6 +51,7 @@ namespace NebulaAio.Champions
             var menuM = new Menu("Misc", "Misc");
             menuM.Add(new MenuKeyBind("semiR", "Semi R", Keys.T, KeyBindType.Press));
             menuM.Add(new MenuSlider("Rrange", "R Range Slider", 2500, 0, 25000));
+            menuM.Add(new MenuSliderButton("Skin", "SkindID", 0, 0, 30, false));
 
             var menuD = new Menu("dsettings", "Drawings ");
             menuD.Add(new MenuBool("drawQ", "Q Range  (White)", true));
@@ -103,6 +104,18 @@ namespace NebulaAio.Champions
 
             }
             Killsteal();
+            skind();
+        }
+        
+        private static void skind()
+        {
+            if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
+            {
+                int skinnu = Config["Misc"].GetValue<MenuSliderButton>("Skin").Value;
+                
+                if (GameObjects.Player.SkinId != skinnu)
+                    GameObjects.Player.SetSkin(skinnu);
+            }
         }
 
         private static void OnDraw(EventArgs args)
@@ -140,7 +153,7 @@ namespace NebulaAio.Champions
 
             if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
-                R.Cast(input.UnitPosition);
+                R.Cast(input.CastPosition);
             }
         }
 
@@ -153,7 +166,7 @@ namespace NebulaAio.Champions
 
             if (W.IsReady() && useW.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(W.Range))
             {
-                W.Cast(input.UnitPosition);
+                W.Cast(input.CastPosition);
             }
         }
 
@@ -168,7 +181,7 @@ namespace NebulaAio.Champions
                 var qpred = Q.GetPrediction(target, false, 0);
                     if (qpred.Hitchance >= HitChance.High)
                     {
-                        Q.Cast(qpred.UnitPosition);
+                        Q.Cast(qpred.CastPosition);
                     }
             }
         }
