@@ -1,14 +1,18 @@
-﻿using EnsoulSharp;
-using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.MenuUI;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Media;
-using System.Security.Policy;
-using EnsoulSharp.SDK.Utility;
+using EnsoulSharp;
+using EnsoulSharp.SDK;
+using System.Threading.Tasks;
+using System.Text;
+using SharpDX;
 using Color = System.Drawing.Color;
+using EnsoulSharp.SDK.MenuUI;
+using System.Reflection;
+using System.Net.Http;
+using System.Net;
+using System.Text.RegularExpressions;
+using EnsoulSharp.SDK.Utility;
 
 namespace NebulaAio.Champions
 {
@@ -22,6 +26,7 @@ namespace NebulaAio.Champions
         private static Vector3 eqpos;
         private static Vector3 movingawaypos;
         private static GameObject Barrel;
+        private static SpellSlot igniteslot;
 
         public static void OnGameLoad()
         {
@@ -38,6 +43,8 @@ namespace NebulaAio.Champions
             Q.SetSkillshot(0.25f, 250f, 1000f, false, SpellType.Circle);
             E.SetSkillshot(0.25f, 180f, 900f, true, SpellType.Line);
             R.SetSkillshot(0.25f, 400f, float.MaxValue, false, SpellType.Circle);
+            
+            igniteslot = ObjectManager.Player.GetSpellSlot("SummonerDot");
 
 
             Config = new Menu("Gragas", "[Nebula]: Gragas", true);
@@ -69,6 +76,7 @@ namespace NebulaAio.Champions
             menuD.Add(new MenuBool("drawE", "E Range (White)", true));
             menuD.Add(new MenuBool("drawR", "R Range  (Red)", true));
             menuD.Add(new MenuBool("DrawInsec", "Draw Insec Position"));
+            menuD.Add(new MenuBool("drawD", "Draw Combo Damage", true));
 
 
 
@@ -181,28 +189,33 @@ namespace NebulaAio.Champions
         private static void InsecCombo()
         {
             var target = TargetSelector.SelectedTarget;
-            if(target == null || !target.IsValidTarget(R.Range))
+            if (target == null || !target.IsValidTarget(R.Range))
             {
                 return;
             }
+
             Orbwalker.Orbwalk(null, Game.CursorPos);
 
             eqpos = ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target));
             insecpos = ObjectManager.Player.Position.Extend(target.Position,
                 ObjectManager.Player.Distance(target) + 200);
-            movingawaypos = ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target) + 300);
+            movingawaypos =
+                ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target) + 300);
             eqpos = ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target) + 100);
-            
+
             eqpos = ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target));
-            insecpos = ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target) + 200);
-            movingawaypos = ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target) + 300);
+            insecpos = ObjectManager.Player.Position.Extend(target.Position,
+                ObjectManager.Player.Distance(target) + 200);
+            movingawaypos =
+                ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target) + 300);
             eqpos = ObjectManager.Player.Position.Extend(target.Position, ObjectManager.Player.Distance(target) + 100);
 
             if (target.IsFacing(ObjectManager.Player) == false &&
                 target.IsMoving & (R.IsInRange(insecpos) && target.Distance(insecpos) < 300))
                 R.Cast(movingawaypos);
 
-            if (R.IsInRange(insecpos) && target.Distance(insecpos) < 300 && target.IsFacing(ObjectManager.Player) && target.IsMoving)
+            if (R.IsInRange(insecpos) && target.Distance(insecpos) < 300 && target.IsFacing(ObjectManager.Player) &&
+                target.IsMoving)
                 R.Cast(eqpos);
 
             else if (R.IsInRange(insecpos) && target.Distance(insecpos) < 300)
@@ -251,6 +264,24 @@ namespace NebulaAio.Champions
                     GameObjects.Player.SetSkin(skinnu);
             }
         }
+        
+        private static float ComboDamage(AIBaseClient enemy)
+        {
+            var damage = 0d;
+            if (igniteslot != SpellSlot.Unknown &&
+                ObjectManager.Player.Spellbook.CanUseSpell(igniteslot) == SpellState.Ready)
+                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, SummonerSpell.Ignite);
+            if (Q.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.Q);
+            if (W.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.W);
+            if (E.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.E);
+            if (R.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.R);
+
+            return (float) damage;
+        }
 
         private static void OnDraw(EventArgs args)
         {
@@ -267,6 +298,34 @@ namespace NebulaAio.Champions
             if (Config["dsettings"].GetValue<MenuBool>("drawR").Enabled)
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Red);
+            }
+            
+            if (Config["dsettings"].GetValue<MenuBool>("drawD").Enabled)
+            {
+                foreach (
+                    var enemyVisible in 
+                    ObjectManager.Get<AIHeroClient>().Where(enemyVisible => enemyVisible.IsValidTarget()))
+                {
+
+                    if (ComboDamage(enemyVisible) > enemyVisible.Health)
+                    {
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50,
+                            Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Red,
+                            "Combo=Kill");
+                    }
+                    else if (ComboDamage(enemyVisible) +
+                        ObjectManager.Player.GetAutoAttackDamage(enemyVisible, true) * 2 > enemyVisible.Health)
+                    {
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50,
+                            Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Orange,
+                            "Combo + 2 AA = Kill");
+                    }
+                    else
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50,
+                            Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Green,
+                            "Unkillable with combo + 2 AA");
+                    
+                }
             }
         }
 

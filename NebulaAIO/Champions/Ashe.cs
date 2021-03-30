@@ -1,12 +1,17 @@
-﻿using EnsoulSharp;
-using EnsoulSharp.SDK;
-using EnsoulSharp.SDK.MenuUI;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Media;
-using System.Security.Policy;
+using EnsoulSharp;
+using EnsoulSharp.SDK;
+using System.Threading.Tasks;
+using System.Text;
+using SharpDX;
+using Color = System.Drawing.Color;
+using EnsoulSharp.SDK.MenuUI;
+using System.Reflection;
+using System.Net.Http;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace NebulaAio.Champions
 {
@@ -15,6 +20,7 @@ namespace NebulaAio.Champions
     {
         private static Spell Q, W, E, R;
         private static Menu Config;
+        private static SpellSlot igniteslot;
 
         public static void OnGameLoad()
         {
@@ -31,6 +37,8 @@ namespace NebulaAio.Champions
             W.SetSkillshot(0.25f, 0f, 2000f, true, SpellType.Cone);
             E.SetSkillshot(0.25f, 300f, 1400f, false, SpellType.Line);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SpellType.Line);
+            
+            igniteslot = ObjectManager.Player.GetSpellSlot("SummonerDot");
 
 
             Config = new Menu("Ashe", "[Nebula]: Ashe", true);
@@ -61,6 +69,7 @@ namespace NebulaAio.Champions
             menuD.Add(new MenuBool("drawW", "W Range  (White)", true));
             menuD.Add(new MenuBool("drawE", "E Range (White)", true));
             menuD.Add(new MenuBool("drawR", "R Range  (Red)", true));
+            menuD.Add(new MenuBool("drawD", "Draw Combo Damage", true));
 
 
 
@@ -160,6 +169,22 @@ namespace NebulaAio.Champions
             }
         }
         
+        private static float ComboDamage(AIBaseClient enemy)
+        {
+            var damage = 0d;
+            if (igniteslot != SpellSlot.Unknown &&
+                ObjectManager.Player.Spellbook.CanUseSpell(igniteslot) == SpellState.Ready)
+                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, SummonerSpell.Ignite);
+            if (Q.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.Q);
+            if (W.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.W);
+            if (R.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.R);
+
+            return (float) damage;
+        }
+        
         private static void skind()
         {
             if (Config["Misc"].GetValue<MenuSliderButton>("Skin").Enabled)
@@ -191,6 +216,34 @@ namespace NebulaAio.Champions
             if (Config["dsettings"].GetValue<MenuBool>("drawR").Enabled)
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Config["Misc"].GetValue<MenuSlider>("Rrange").Value, System.Drawing.Color.Red);
+            }
+            
+            if (Config["dsettings"].GetValue<MenuBool>("drawD").Enabled)
+            {
+                foreach (
+                    var enemyVisible in 
+                    ObjectManager.Get<AIHeroClient>().Where(enemyVisible => enemyVisible.IsValidTarget()))
+                {
+
+                    if (ComboDamage(enemyVisible) > enemyVisible.Health)
+                    {
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50,
+                            Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Red,
+                            "Combo=Kill");
+                    }
+                    else if (ComboDamage(enemyVisible) +
+                        ObjectManager.Player.GetAutoAttackDamage(enemyVisible, true) * 3 > enemyVisible.Health)
+                    {
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50,
+                            Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Orange,
+                            "Combo + 3 AA = Kill");
+                    }
+                    else
+                        Drawing.DrawText(Drawing.WorldToScreen(enemyVisible.Position)[0] + 50,
+                            Drawing.WorldToScreen(enemyVisible.Position)[1] - 40, Color.Green,
+                            "Unkillable with combo + 3 AA");
+                    
+                }
             }
         }
 
