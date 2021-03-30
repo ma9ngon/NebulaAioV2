@@ -256,10 +256,11 @@ namespace NebulaAio.Champions
         private static void LogicW()
         {
             var target = TargetSelector.GetTarget(W.Range);
+            var useW = Config["Csettings"].GetValue<MenuBool>("UseW");
             var ally = GameObjects.AllyHeroes.Where(x => x.IsValidTarget(W.Range, false) && x.HealthPercent < 35 && !x.IsMe)
                 .OrderBy(x => x.Health).ToList();
 
-            if (ally.Count > 0)
+            if (ally.Count > 0 && useW.Enabled)
             {
                 W.Cast(ally[0].Position);
             }
