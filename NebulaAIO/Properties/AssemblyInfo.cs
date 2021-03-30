@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("NebulaAIO")]
 [assembly: AssemblyDescription("NebulaAIO")]
 [assembly: AssemblyConfiguration("Nebula")]
-[assembly: AssemblyCompany("Akane")]
+[assembly: AssemblyCompany("Akane & Impressive")]
 [assembly: AssemblyProduct("NebulaAIO")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // Sie können alle Werte angeben oder Standardwerte für die Build- und Revisionsnummern verwenden,
 // indem Sie "*" wie unten gezeigt eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.0.16")]
-[assembly: AssemblyFileVersion("2.0.0.16")]
+[assembly: AssemblyVersion("2.0.0.17")]
+[assembly: AssemblyFileVersion("2.0.0.17")]
