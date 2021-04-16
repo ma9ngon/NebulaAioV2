@@ -159,10 +159,21 @@
         </member>
         <member name="M:EnsoulSharp.Hud.ShowClick(EnsoulSharp.ClickType,SharpDX.Vector3)">
             <summary>
-	Show specific click effect on specified 3D world position.
+	Shows specific click effect on specified 3D world position.
 </summary>
             <param name="type">The click type.</param>
             <param name="position">The 3D world click position.</param>
+        </member>
+        <member name="M:EnsoulSharp.Hud.SetCameraLockState(System.Boolean)">
+            <summary>
+	Sets specific camera lock state.
+</summary>
+            <param name="locked" />
+        </member>
+        <member name="P:EnsoulSharp.Hud.DragonSRX">
+            <summary>
+	Gets the dragon srx.
+</summary>
         </member>
         <member name="T:EnsoulSharp.Hud">
             <summary>
@@ -442,7 +453,7 @@
         </member>
         <member name="E:EnsoulSharp.Drawing.OnBeginScene">
             <summary>
-	This event is fired before D3D9.BeginScene.
+	This event is fired after D3D9.BeginScene.
 </summary>
         </member>
         <member name="E:EnsoulSharp.Drawing.OnDraw">
@@ -453,6 +464,46 @@
         <member name="T:EnsoulSharp.Drawing">
             <summary>
 	This class contains everything we can offer related to drawing.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.DragonSRXSlot.Soul">
+            <summary>
+	Gets a value indicating whether the dragon is soul.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.DragonSRXSlot.Team">
+            <summary>
+	Gets the team of the dragon.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.DragonSRXSlot.Id">
+            <summary>
+	Gets the id of the dragon.
+</summary>
+        </member>
+        <member name="T:EnsoulSharp.DragonSRXSlot">
+            <summary>
+	This class contains everything we can offer related to each dragon srx slot.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.DragonSRX.ElementsTwo">
+            <summary>
+	Gets the elements two.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.DragonSRX.ElementsOne">
+            <summary>
+	Gets the elements one.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.DragonSRX.Center">
+            <summary>
+	Gets the center element.
+</summary>
+        </member>
+        <member name="T:EnsoulSharp.DragonSRX">
+            <summary>
+	This class contains everything we can offer related to dragon srx.
 </summary>
         </member>
         <member name="P:EnsoulSharp.EffectEmitter.RestartTime">
@@ -1107,16 +1158,6 @@
 	Gets a value indicating whether the spell was cast.
 </summary>
         </member>
-        <member name="P:EnsoulSharp.Spellbook.SpellEndTime">
-            <summary>
-	Gets the spell end time.
-</summary>
-        </member>
-        <member name="P:EnsoulSharp.Spellbook.SpellCastTime">
-            <summary>
-	Gets the spell cast time.
-</summary>
-        </member>
         <member name="P:EnsoulSharp.Spellbook.IsStopped">
             <summary>
 	Gets a value indicating whether is stopped now.
@@ -1147,9 +1188,24 @@
 	Gets a value indicating whether is casting spell now.
 </summary>
         </member>
+        <member name="P:EnsoulSharp.Spellbook.CastEndTime">
+            <summary>
+	Gets the spell end time.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.Spellbook.CastTime">
+            <summary>
+	Gets the spell cast time.
+</summary>
+        </member>
         <member name="P:EnsoulSharp.Spellbook.Owner">
             <summary>
 	Gets the book owner.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.Spellbook.ActiveSpell">
+            <summary>
+	Gets the active spell if exist, otherwise null.
 </summary>
         </member>
         <member name="P:EnsoulSharp.Spellbook.Spells">
@@ -1876,6 +1932,21 @@
 	Gets a value indicating whether the object is moving.
 </summary>
         </member>
+        <member name="P:EnsoulSharp.AIBaseClient.IsHPBarRendered">
+            <summary>
+	Gets a value indicating whether the object's health bar is rendered.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.AIBaseClient.CharacterStateIndicatorActive">
+            <summary>
+	Gets a value indicating whether the character state indicator index is active.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.AIBaseClient.CharacterStateIndicatorIndex">
+            <summary>
+	Gets the character state indicator index of the object.
+</summary>
+        </member>
         <member name="P:EnsoulSharp.AIBaseClient.SkinId">
             <summary>
 	Gets the skin id of the object.
@@ -1901,6 +1972,11 @@
 	Gets the inventory items of the object.
 </summary>
         </member>
+        <member name="P:EnsoulSharp.AIBaseClient.Pet">
+            <summary>
+	Gets the first pet of the object.
+</summary>
+        </member>
         <member name="P:EnsoulSharp.AIBaseClient.BasicAttack">
             <summary>
 	Gets the first basic attack of the object.
@@ -1919,6 +1995,11 @@
         <member name="P:EnsoulSharp.AIBaseClient.InfoComponentBasePosition">
             <summary>
 	Gets the info component base position of the object.
+</summary>
+        </member>
+        <member name="P:EnsoulSharp.AIBaseClient.Velocity">
+            <summary>
+	Gets the velocity of the object.
 </summary>
         </member>
         <member name="P:EnsoulSharp.AIBaseClient.Direction">

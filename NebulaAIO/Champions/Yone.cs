@@ -54,6 +54,7 @@ namespace NebulaAio.Champions
             menuL.Add(new MenuBool("LcW", "Use W in Lanclear"));
             menuL.Add(new MenuBool("JcQ", "Use Q in Jungleclear"));
             menuL.Add(new MenuBool("JcW", "Use W in Jungleclear"));
+            menuL.Add(new MenuBool("LhQ", "Use Q To Last Hit"));
             
             var menuK = new Menu("Killsteal", "Killsteal");
             menuK.Add(new MenuBool("KsQ", "Use Q to Killsteal"));
@@ -103,7 +104,7 @@ namespace NebulaAio.Champions
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.LastHit)
             {
-
+                LastHit();
             }
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.Harass)
@@ -255,6 +256,18 @@ namespace NebulaAio.Champions
             }
         }
 
+        private static void LastHit()
+        {
+            var allMinions = GameObjects.EnemyMinions.Where(x => x.IsMinion() && !x.IsDead)
+                .OrderBy(x => x.Distance(ObjectManager.Player.Position));
+            var qlh = Config["Clear"].GetValue<MenuBool>("LhQ");
+
+            foreach (var min in allMinions.Where(x => x.IsValidTarget(Q.Range) && x.Health < Q.GetDamage(x) && qlh.Enabled))
+            {
+                Orbwalker.ForceTarget = min;
+                Q.Cast(min);
+            }
+        }
 
         private static void Laneclear()
         {
