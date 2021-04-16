@@ -21,6 +21,7 @@ namespace NebulaAio.Champions
         private static Spell Q, W, E, R;
         private static Menu Config, menuC, menuL, menuK, menuM, menuD;
         private static SpellSlot igniteslot;
+        private static HitChance hitchance;
 
         public static void OnGameLoad()
         {
@@ -48,6 +49,8 @@ namespace NebulaAio.Champions
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuList("EMode", "E Combo Mode", new string[] {"Target", "Mouse"}, 1));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
+            menuC.Add(new MenuList("Pred", "Prediction Hitchance",
+                new string[] {"Low", "Medium", "High", "Very High"}, 2));
             Config.Add(menuC);
 
             menuL = new Menu("Clear", "Clear");
@@ -199,7 +202,16 @@ namespace NebulaAio.Champions
             var input = R.GetPrediction(target);
             if (target == null) return;
             
-            if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 3 >= target.Health && target.IsValidTarget(R.Range))
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
+            
+            if (R.IsReady() && useR.Enabled && input.Hitchance >= hitchance && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 3 >= target.Health && target.IsValidTarget(R.Range))
             {
                 R.Cast(input.CastPosition);
             }

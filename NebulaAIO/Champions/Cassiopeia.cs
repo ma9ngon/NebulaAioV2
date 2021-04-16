@@ -19,8 +19,9 @@ namespace NebulaAio.Champions
     public class Cassiopeia
     {
         private static Spell Q, W, E, R;
-        private static Menu Config;
+        private static Menu Config, menuC;
         private static SpellSlot igniteslot;
+        private static HitChance hitchance;
 
         public static void OnGameLoad()
         {
@@ -45,11 +46,13 @@ namespace NebulaAio.Champions
 
             Config = new Menu("Cassiopeia", "[Nebula]: Cassiopeia", true);
 
-            var menuC = new Menu("Csettings", "Combo");
+            menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
+            menuC.Add(new MenuList("Pred", "Prediction Hitchance",
+                new string[] {"Low", "Medium", "High", "Very High"}, 2));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcQ", "Use Q in Lanclear"));
@@ -83,6 +86,11 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
+        }
+        
+        static int comb(Menu submenu, string sig)
+        {
+            return submenu[sig].GetValue<MenuList>().Index;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -209,13 +217,22 @@ namespace NebulaAio.Champions
             {
                 return;
             }
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (R.IsReady() && useR.Enabled && target.IsBothFacing(GameObjects.Player) && GameObjects.Player.CountEnemyHeroesInRange(400f) > 1 && input.Hitchance >= HitChance.High)
+            if (R.IsReady() && useR.Enabled && target.IsBothFacing(GameObjects.Player) && GameObjects.Player.CountEnemyHeroesInRange(400f) > 1 && input.Hitchance >= hitchance)
             {
                 R.Cast(input.CastPosition);
             }
             
-            if (R.IsReady() && useR.Enabled && R.GetDamage(target) + Q.GetDamage(target) + E.GetDamage(target) + W.GetDamage(target) >= target.Health && input.Hitchance >= HitChance.High)
+            if (R.IsReady() && useR.Enabled && R.GetDamage(target) + Q.GetDamage(target) + E.GetDamage(target) + W.GetDamage(target) >= target.Health && input.Hitchance >= hitchance)
             {
                 R.Cast(input.CastPosition);
             }
@@ -259,8 +276,17 @@ namespace NebulaAio.Champions
             var input = Q.GetPrediction(target);
             if (target == null) return;
             
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
+            
 
-            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= HitChance.High && !target.HasBuffOfType(BuffType.Poison) && target.IsValidTarget(Q.Range))
+            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= hitchance && !target.HasBuffOfType(BuffType.Poison) && target.IsValidTarget(Q.Range))
             {
                 Q.Cast(input.CastPosition);
             }

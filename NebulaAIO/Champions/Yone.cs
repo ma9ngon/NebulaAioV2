@@ -19,9 +19,10 @@ namespace NebulaAio.Champions
     public class Yone
     {
         private static Spell Q, Q3, W, R;
-        private static Menu Config;
+        private static Menu Config, menuC;
         private static bool YoneQ3;
         private static SpellSlot igniteslot;
+        private static HitChance hitchance;
 
         public static void OnGameLoad()
         {
@@ -44,10 +45,12 @@ namespace NebulaAio.Champions
 
             Config = new Menu("Yone", "[Nebula]: Yone", true);
 
-            var menuC = new Menu("Csettings", "Combo");
+            menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
+            menuC.Add(new MenuList("Pred", "Prediction Hitchance",
+                new string[] {"Low", "Medium", "High", "Very High"}, 2));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcQ", "Use Q in Lanclear"));
@@ -83,6 +86,11 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
+        }
+        
+        static int comb(Menu submenu, string sig)
+        {
+            return submenu[sig].GetValue<MenuList>().Index;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -210,7 +218,16 @@ namespace NebulaAio.Champions
             var input = R.GetPrediction(target);
             if (target == null) return;
             
-            if (R.IsReady() && useR.Enabled && R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target) > target.Health && input.Hitchance >= HitChance.High && target.IsValidTarget(R.Range))
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
+            
+            if (R.IsReady() && useR.Enabled && R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target) > target.Health && input.Hitchance >= hitchance && target.IsValidTarget(R.Range))
             {
                 R.Cast(input.CastPosition);
             }
@@ -222,8 +239,17 @@ namespace NebulaAio.Champions
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW");
             var input = W.GetPrediction(target);
             if (target == null) return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (W.IsReady() && useW.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(W.Range))
+            if (W.IsReady() && useW.Enabled && input.Hitchance >= hitchance && target.IsValidTarget(W.Range))
             {
                 W.Cast(input.CastPosition);
             }
@@ -235,8 +261,17 @@ namespace NebulaAio.Champions
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ");
             var input = Q.GetPrediction(target);
             if (target == null) return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (Q.IsReady() && useQ.Enabled && target.IsValidTarget(Q.Range) && input.Hitchance >= HitChance.High)
+            if (Q.IsReady() && useQ.Enabled && target.IsValidTarget(Q.Range) && input.Hitchance >= hitchance)
             {
                 Q.Cast(input.CastPosition);
             }

@@ -19,9 +19,10 @@ namespace NebulaAio.Champions
     public class Xerath
     {
         private static Spell Q, W, E, R;
-        private static Menu Config;
+        private static Menu Config, menuC;
         private static bool CheckTarget = false;
         private static SpellSlot igniteslot;
+        private static HitChance hitchance;
 
         public static void OnGameLoad()
         {
@@ -46,11 +47,13 @@ namespace NebulaAio.Champions
 
             Config = new Menu("Xerath", "[Nebula]: Xerath", true);
 
-            var menuC = new Menu("Csettings", "Combo");
+            menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
+            menuC.Add(new MenuList("Pred", "Prediction Hitchance",
+                new string[] {"Low", "Medium", "High", "Very High"}, 2));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcQ", "Use Q in Laneclear"));
@@ -90,11 +93,25 @@ namespace NebulaAio.Champions
             AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Game.OnUpdate += Check;
         }
+        
+        static int comb(Menu submenu, string sig)
+        {
+            return submenu[sig].GetValue<MenuList>().Index;
+        }
 
         public static void OnGameUpdate(EventArgs args)
         {
             if (ObjectManager.Player.IsDead)
                 return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
             if (ObjectManager.Player.HasBuff("XerathLocusOfPower2"))
             {
@@ -119,7 +136,7 @@ namespace NebulaAio.Champions
                                 i.DistanceToCursor() <= Config["Misc"].GetValue<MenuSlider>("Cusor").Value);
                             var input = R.GetPrediction(target);
 
-                            if (target != null && input.Hitchance >= HitChance.High && !target.IsInvulnerable)
+                            if (target != null && input.Hitchance >= hitchance && !target.IsInvulnerable)
                             {
                                 R.Cast(input.CastPosition);
                                 return;
@@ -296,33 +313,25 @@ namespace NebulaAio.Champions
         {
             var target = TargetSelector.GetTarget(Q.Range);
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ").Enabled;
-            var slowpred = Config["Misc"].GetValue<MenuBool>("Qslow").Enabled;
             var input = Q.GetPrediction(target);
             if (target == null) return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (Q.IsReady() && useQ && !slowpred && target.IsValidTarget(Q.Range) && input.Hitchance >= HitChance.High)
+            if (Q.IsReady() && useQ && target.IsValidTarget(Q.Range) && input.Hitchance >= hitchance)
             {
                 Q.StartCharging();
                 {
-                    if (Q.IsChargedSpell && input.Hitchance >= HitChance.High)
+                    if (Q.IsChargedSpell && input.Hitchance >= hitchance)
                     {
                         Q.Cast(input.CastPosition);
-                    }
-                }
-            }
-            else if (Q.IsReady() && useQ && slowpred)
-            {
-                Q.StartCharging();
-                {
-                    if (Q.IsCharging)
-                    {
-                        if (Q.IsChargedSpell && target.IsValidTarget(Q.ChargedMaxRange))
-                        {
-                            if (input.Hitchance >= HitChance.VeryHigh)
-                            {
-                                Q.ShootChargedSpell(input.CastPosition);
-                            }
-                        }
                     }
                 }
             }
@@ -334,8 +343,17 @@ namespace NebulaAio.Champions
             var useW = Config["Csettings"].GetValue<MenuBool>("UseW").Enabled;
             var input = W.GetPrediction(target);
             if (target == null) return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (W.IsReady() && useW && target.IsValidTarget(W.Range) && input.Hitchance >= HitChance.High)
+            if (W.IsReady() && useW && target.IsValidTarget(W.Range) && input.Hitchance >= hitchance)
             {
                 W.Cast(input.CastPosition);
             }
@@ -348,8 +366,17 @@ namespace NebulaAio.Champions
             var input = E.GetPrediction(target);
             if (target == null) return;
             
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
+            
             if (E.IsReady() && useE && target.IsValidTarget(E.Range) && !target.HasBuffOfType(BuffType.SpellShield) &&
-                input.Hitchance >= HitChance.High)
+                input.Hitchance >= hitchance)
             {
                 E.Cast(input.CastPosition);
             }

@@ -19,8 +19,9 @@ namespace NebulaAio.Champions
     public class Ashe
     {
         private static Spell Q, W, E, R;
-        private static Menu Config;
+        private static Menu Config, menuC;
         private static SpellSlot igniteslot;
+        private static HitChance hitchance;
 
         public static void OnGameLoad()
         {
@@ -43,11 +44,13 @@ namespace NebulaAio.Champions
 
             Config = new Menu("Ashe", "[Nebula]: Ashe", true);
 
-            var menuC = new Menu("Csettings", "Combo");
+            menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
+            menuC.Add(new MenuList("Pred", "Prediction Hitchance",
+                new string[] {"Low", "Medium", "High", "Very High"}, 2));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcW", "Use W in Lanclear"));
@@ -85,6 +88,11 @@ namespace NebulaAio.Champions
             Drawing.OnDraw += OnDraw;
             AntiGapcloser.OnGapcloser += Gapcloser_OnGapcloser;
             Interrupter.OnInterrupterSpell += OnInterruptible;
+        }
+        
+        static int comb(Menu submenu, string sig)
+        {
+            return submenu[sig].GetValue<MenuList>().Index;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -253,13 +261,22 @@ namespace NebulaAio.Champions
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR");
             var input = R.GetPrediction(target);
             if (target == null) return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (R.IsReady() && input.Hitchance >= HitChance.High && useR.Enabled && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
+            if (R.IsReady() && input.Hitchance >= hitchance && useR.Enabled && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
                 R.Cast(input.CastPosition);
             }
             
-            if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && R.GetDamage(target) + W.GetDamage(target) >= target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
+            if (R.IsReady() && useR.Enabled && hitchance >= HitChance.High && R.GetDamage(target) + W.GetDamage(target) >= target.Health && target.IsValidTarget(Config["Misc"].GetValue<MenuSlider>("Rrange").Value))
             {
                 R.Cast(input.CastPosition);
             }

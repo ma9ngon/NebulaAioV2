@@ -19,8 +19,9 @@ namespace NebulaAio.Champions
     public class Malphite
     {
         private static Spell Q, W, E, R;
-        private static Menu Config;
+        private static Menu Config, menuC;
         private static SpellSlot igniteslot;
+        private static HitChance hitchance;
 
         public static void OnGameLoad()
         {
@@ -41,12 +42,14 @@ namespace NebulaAio.Champions
 
             Config = new Menu("Malphite", "[Nebula]: Malphite", true);
 
-            var menuC = new Menu("Csettings", "Combo");
+            menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
             menuC.Add(new MenuSlider("rcount", "Min enemys To use R", 2, 1, 5));
+            menuC.Add(new MenuList("Pred", "Prediction Hitchance",
+                new string[] {"Low", "Medium", "High", "Very High"}, 2));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcE", "Use Q in Lanclear"));
@@ -81,6 +84,11 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
+        }
+        
+        static int comb(Menu submenu, string sig)
+        {
+            return submenu[sig].GetValue<MenuList>().Index;
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -212,9 +220,18 @@ namespace NebulaAio.Champions
             var target = TargetSelector.GetTarget(1000);
             var useR = Config["Csettings"].GetValue<MenuBool>("UseR");
             var combor = Config["Csettings"].GetValue<MenuSlider>("rcount").Value;
-            var input = R.GetPrediction(target);
+            var input = R.GetPrediction(target, true);
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (R.IsReady() && useR.Enabled && input.Hitchance >= HitChance.High && Q.GetDamage(target) + W.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && target.IsValidTarget(R.Range))
+            if (R.IsReady() && useR.Enabled && input.Hitchance >= hitchance && Q.GetDamage(target) + W.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health && target.IsValidTarget(R.Range))
             {
                 R.Cast(input.CastPosition);
             }

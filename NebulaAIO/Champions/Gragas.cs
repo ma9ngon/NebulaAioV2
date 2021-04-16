@@ -20,7 +20,8 @@ namespace NebulaAio.Champions
     public class Gragas
     {
         private static Spell Q, W, E, R;
-        private static Menu Config;
+        private static Menu Config, menuC;
+        private static HitChance hitchance;
         private static bool Exploded { get; set;  }
         private static Vector3 insecpos;
         private static Vector3 eqpos;
@@ -49,11 +50,13 @@ namespace NebulaAio.Champions
 
             Config = new Menu("Gragas", "[Nebula]: Gragas", true);
 
-            var menuC = new Menu("Csettings", "Combo");
+            menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
             menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
+            menuC.Add(new MenuList("Pred", "Prediction Hitchance",
+                new string[] {"Low", "Medium", "High", "Very High"}, 2));
 
             var menuL = new Menu("Clear", "Clear");
             menuL.Add(new MenuBool("LcQ", "Use Q in Lanclear"));
@@ -94,6 +97,11 @@ namespace NebulaAio.Champions
             GameObject.OnDelete += GragasBarrelNull;
             Drawing.OnDraw += etcdraw;
             AntiGapcloser.OnGapcloser += OnEnemyGapcloser;
+        }
+        
+        static int comb(Menu submenu, string sig)
+        {
+            return submenu[sig].GetValue<MenuList>().Index;
         }
 
         private static void OnEnemyGapcloser(AIHeroClient sender, AntiGapcloser.GapcloserArgs args)
@@ -193,6 +201,15 @@ namespace NebulaAio.Champions
             {
                 return;
             }
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
             Orbwalker.Orbwalk(null, Game.CursorPos);
 
@@ -224,7 +241,7 @@ namespace NebulaAio.Champions
             if (!Exploded) return;
 
             var prediction = E.GetPrediction(target);
-            if (prediction.Hitchance >= HitChance.High)
+            if (prediction.Hitchance >= hitchance)
             {
                 E.Cast(target.Position);
                 Q.Cast(target.Position);
@@ -359,13 +376,22 @@ namespace NebulaAio.Champions
             var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
             var input = E.GetPrediction(target);
             if (target == null) return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (E.IsReady() && useE.Enabled && ObjectManager.Player.HasBuff("GragasWAttackBuff") && input.Hitchance >= HitChance.Medium && target.IsValidTarget(E.Range))
+            if (E.IsReady() && useE.Enabled && ObjectManager.Player.HasBuff("GragasWAttackBuff") && input.Hitchance >= hitchance && target.IsValidTarget(E.Range))
             {
                 E.Cast(input.CastPosition);
             }
 
-            if (E.IsReady() && useE.Enabled && input.Hitchance >= HitChance.High && target.IsValidTarget(E.Range) &&
+            if (E.IsReady() && useE.Enabled && input.Hitchance >= hitchance && target.IsValidTarget(E.Range) &&
                 Q.GetDamage(target) + W.GetDamage(target) + E.GetDamage(target) + R.GetDamage(target) >= target.Health)
             {
                 E.Cast(input.CastPosition);
@@ -379,8 +405,17 @@ namespace NebulaAio.Champions
             var input = Q.GetPrediction(target);
             var useQ = Config["Csettings"].GetValue<MenuBool>("UseQ");
             if (target == null) return;
+            
+            switch (comb(menuC, "Pred"))
+            {
+                case 0: hitchance = HitChance.Low; break;
+                case 1: hitchance = HitChance.Medium; break;
+                case 2: hitchance = HitChance.High; break;
+                case 3: hitchance = HitChance.VeryHigh; break;
+                default: hitchance = HitChance.High; break;
+            }
 
-            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= HitChance.High && Barrel == null && target.IsValidTarget(Q.Range))
+            if (Q.IsReady() && useQ.Enabled && input.Hitchance >= hitchance && Barrel == null && target.IsValidTarget(Q.Range))
             {
                 Q.Cast(input.CastPosition);
             }
