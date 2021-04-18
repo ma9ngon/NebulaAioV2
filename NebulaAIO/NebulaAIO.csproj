@@ -72,6 +72,7 @@
     <Compile Include="Champions\Ashe.cs" />
     <Compile Include="Champions\Blitzcrank.cs" />
     <Compile Include="Champions\Cassiopeia.cs" />
+    <Compile Include="Champions\Chogath.cs" />
     <Compile Include="Champions\Corki.cs" />
     <Compile Include="Champions\Diana.cs" />
     <Compile Include="Champions\Ezreal.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Champions\Samira.cs" />
     <Compile Include="Champions\Swain.cs" />
     <Compile Include="Champions\Twitch.cs" />
+    <Compile Include="Champions\Veigar.cs" />
     <Compile Include="Champions\Viego.cs" />
     <Compile Include="Champions\Xerath.cs" />
     <Compile Include="Champions\Yone.cs" />
