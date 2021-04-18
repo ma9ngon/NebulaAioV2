@@ -31,7 +31,7 @@ namespace NebulaAio.Champions
 
             Q = new Spell(SpellSlot.Q, 340f);
             W = new Spell(SpellSlot.W, 550f);
-            E = new Spell(SpellSlot.E, ObjectManager.Player.GetCurrentAutoAttackRange());
+            E = new Spell(SpellSlot.E, ObjectManager.Player.GetRealAutoAttackRange());
             R = new Spell(SpellSlot.R, 500f);
 
             E.SetTargetted(0.25f, float.MaxValue);
