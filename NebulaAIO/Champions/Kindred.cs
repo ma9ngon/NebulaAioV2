@@ -78,6 +78,7 @@ namespace NebulaAio.Champions
         public static void OnGameUpdate(EventArgs args)
         {
 
+            E.Range = ObjectManager.Player.GetRealAutoAttackRange();
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
