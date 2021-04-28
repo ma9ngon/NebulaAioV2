@@ -271,6 +271,12 @@ namespace NebulaAio.Champions
             {
                 E.Cast(target);
             }
+
+            if (E.IsReady() && useE.Enabled &&
+                E.GetDamage(target) + ObjectManager.Player.GetAutoAttackDamage(target) >= target.Health)
+            {
+                E.Cast(target);
+            }
         }
         
 

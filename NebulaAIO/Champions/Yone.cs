@@ -18,7 +18,7 @@ namespace NebulaAio.Champions
 
     public class Yone
     {
-        private static Spell Q, Q3, W, R;
+        private static Spell Q, Q3, W, E, R;
         private static Menu Config, menuC;
         private static bool YoneQ3;
         private static SpellSlot igniteslot;
@@ -37,8 +37,15 @@ namespace NebulaAio.Champions
             Q3.SetSkillshot(0.25f, 160f, 1500f, false, SpellType.Line);
             W = new Spell(SpellSlot.W, 600f);
             W.SetSkillshot(0.46f, 0f, 500f, false, SpellType.Cone);
+            E = new Spell(SpellSlot.E, 300f);
             R = new Spell(SpellSlot.R, 1000);
             R.SetSkillshot(0.75f, 255f, 1500f, false, SpellType.Line);
+
+            foreach (var item in GameObjects.EnemyHeroes)
+            {
+                var target = item;
+                ListDmg.Add(new DmgOnTarget(target.NetworkId, 0));
+            }
             
             igniteslot = ObjectManager.Player.GetSpellSlot("SummonerDot");
 
@@ -48,6 +55,7 @@ namespace NebulaAio.Champions
             menuC = new Menu("Csettings", "Combo");
             menuC.Add(new MenuBool("UseQ", "Use Q in Combo"));
             menuC.Add(new MenuBool("UseW", "Use W in Combo"));
+            menuC.Add(new MenuBool("UseE", "Use E in Combo"));
             menuC.Add(new MenuBool("UseR", "Use R in Combo"));
             menuC.Add(new MenuList("Pred", "Prediction Hitchance",
                 new string[] {"Low", "Medium", "High", "Very High"}, 2));
@@ -86,11 +94,72 @@ namespace NebulaAio.Champions
 
             GameEvent.OnGameTick += OnGameUpdate;
             Drawing.OnDraw += OnDraw;
+            AIBaseClient.OnBuffAdd += AIBaseClient_OnBuffAdd;
         }
-        
+
         static int comb(Menu submenu, string sig)
         {
             return submenu[sig].GetValue<MenuList>().Index;
+        }
+
+        private static List<DmgOnTarget> ListDmg = new List<DmgOnTarget>();
+        class DmgOnTarget
+
+        {
+            public int UID;
+            public double dmg;
+            public DmgOnTarget(int ID, double Dmg)
+            {
+                UID = ID;
+                dmg = Dmg;
+            }
+        }
+
+        private static void AIBaseClient_OnBuffAdd(AIBaseClient sender, AIBaseClientBuffAddEventArgs args)
+        {
+            if (args.Buff.Name != "")
+                return;
+
+
+            var FindinList = ListDmg.Where(i => i.UID == sender.NetworkId);
+            if (FindinList.Count() >= 1)
+            {
+                var target = FindinList.FirstOrDefault();
+
+                //start dmg
+                target.dmg = 0;
+            }
+        }
+
+        private static double GetEDmg(AIBaseClient target)
+        {
+            if (!target.HasBuff(""))
+                return 0;
+            var findinlist = ListDmg.Where(i => i.UID == target.NetworkId);
+            if (findinlist.Count() < 1)
+                return 0;
+
+            double dmg = 0;
+            var list = new double[]
+            {
+                0.25, 0.275, 0.3, 0.325, 0.35
+            };
+            var xtarget = findinlist.FirstOrDefault();
+            dmg += list[E.Level] * xtarget.dmg;
+
+            return dmg;
+        }
+
+        private static bool isE2()
+        {
+            if (ObjectManager.Player.Mana > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public static void OnGameUpdate(EventArgs args)
@@ -99,6 +168,7 @@ namespace NebulaAio.Champions
 
             if (Orbwalker.ActiveMode == OrbwalkerMode.Combo)
             {
+                LogicE();
                 LogicR();
                 LogicW();
                 LogicQ();
@@ -230,6 +300,18 @@ namespace NebulaAio.Champions
             if (R.IsReady() && useR.Enabled && R.GetDamage(target) + Q.GetDamage(target) * 2 + W.GetDamage(target) > target.Health && input.Hitchance >= hitchance && target.IsValidTarget(R.Range))
             {
                 R.Cast(input.CastPosition);
+            }
+        }
+
+        private static void LogicE()
+        {
+            var target = TargetSelector.GetTarget(650f);
+            var useE = Config["Csettings"].GetValue<MenuBool>("UseE");
+
+            if (useE.Enabled && E.IsReady() && !isE2() && target != null)
+            {
+                E.Cast(target.Position);
+                return;
             }
         }
 
